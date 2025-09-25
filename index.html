@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Tiny Realms</title>
+
+  <!-- Fuentes medievales -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=MedievalSharp&display=swap" rel="stylesheet" />
+
+  <!-- Estilos personalizados -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+  <!-- Pantalla de configuración -->
+  <section id="setup-screen" class="screen-container fade-in">
+    <h1 class="game-title">⚔️ The Tiny Realms ⚔️</h1>
+    
+    <div class="setup-form">
+      <div class="form-group">
+        <label for="player-count" class="form-label">Cantidad de jugadores:</label>
+        <select id="player-count" class="input-medieval" aria-label="Cantidad de jugadores">
+          <option value="2">2 Jugadores</option>
+          <option value="3">3 Jugadores</option>
+          <option value="4" selected>4 Jugadores</option>
+          <option value="5">5 Jugadores</option>
+          <option value="6">6 Jugadores</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-container">
+          <input type="checkbox" id="use-characters" aria-label="Usar personajes">
+          <span class="checkbox-label">🧙‍♂️ Usar personajes especiales</span>
+        </label>
+      </div>
+
+      <div id="player-inputs" class="player-inputs">
+        <!-- Inputs dinámicos -->
+      </div>
+
+      <button id="start-button" class="btn-primary start-btn" aria-label="Iniciar Juego">
+        🎮 Iniciar Partida
+      </button>
+    </div>
+  </section>
+
+  <!-- Pantalla de juego -->
+  <section id="game-screen" class="hidden screen-container fade-in">
+    <h2 class="game-subtitle">⚔️ Batalla en curso ⚔️</h2>
+    <div id="players-container">
+      <!-- Tarjetas de jugador -->
+    </div>
+  </section>
+
+  <button id="reset-button" aria-label="Reiniciar Partida">
+    <img src="media/iconos/reinicio.png" alt="Reiniciar">
+  </button>
+  <!-- Script principal -->
+  <script src="js/main.js"></script>
+</body>
+</html>
