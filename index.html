@@ -13,33 +13,50 @@
 </head>
 
 <body>
-  <!-- Pantalla de configuración -->
-  <section id="setup-screen" class="screen-container fade-in">
-    <h1 class="game-title">⚔️ The Tiny Realms ⚔️</h1>
-    
-    <div class="setup-form">
+  <!-- Pantalla de configuración compacta -->
+  <section id="setup-screen" class="setup-container fade-in" role="region" aria-label="Configuración del juego">
+    <div id="setup-initial" class="setup-form">
       <div class="form-group">
         <label for="player-count" class="form-label">Cantidad de jugadores:</label>
         <select id="player-count" class="input-medieval" aria-label="Cantidad de jugadores">
+          <option value="1">1 Jugador</option>
           <option value="2">2 Jugadores</option>
           <option value="3">3 Jugadores</option>
           <option value="4" selected>4 Jugadores</option>
-          <option value="5">5 Jugadores</option>
-          <option value="6">6 Jugadores</option>
         </select>
       </div>
-
       <div class="form-group">
         <label class="checkbox-container">
           <input type="checkbox" id="use-characters" aria-label="Usar personajes">
           <span class="checkbox-label">🧙‍♂️ Usar personajes especiales</span>
         </label>
       </div>
-
-      <div id="player-inputs" class="player-inputs">
-        <!-- Inputs dinámicos -->
+      <button id="next-setup" class="btn-primary" aria-label="Continuar">Continuar</button>
+    </div>
+    <!-- Inputs uno por uno para cada jugador -->
+    <div id="player-step" class="hidden player-step-form">
+      <h3 id="player-step-title">Jugador 1</h3>
+      <div class="form-group">
+        <label for="player-name" class="form-label">Nombre del jugador:</label>
+        <input type="text" id="player-name" class="input-medieval" aria-label="Nombre del jugador" />
       </div>
-
+      <div class="form-group" id="character-select-group" style="display:none;">
+        <label for="player-character" class="form-label">Personaje:</label>
+        <select id="player-character" class="input-medieval" aria-label="Personaje">
+          <option value="">Seleccionar personaje...</option>
+          <option value="warrior">Guerrero</option>
+          <option value="cleric">Clérigo</option>
+          <option value="thief">Ladrón</option>
+          <option value="wizard">Hechicero</option>
+          <option value="ranger">Explorador</option>
+        </select>
+      </div>
+      <button id="next-player" class="btn-primary" aria-label="Siguiente jugador">Siguiente</button>
+    </div>
+    <!-- Resumen final antes de iniciar -->
+    <div id="player-summary" class="hidden player-summary-form">
+      <h3>Resumen de jugadores</h3>
+      <ul id="summary-list"></ul>
       <button id="start-button" class="btn-primary start-btn" aria-label="Iniciar Juego">
         🎮 Iniciar Partida
       </button>
@@ -47,16 +64,22 @@
   </section>
 
   <!-- Pantalla de juego -->
-  <section id="game-screen" class="hidden screen-container fade-in">
-    <h2 class="game-subtitle">⚔️ Batalla en curso ⚔️</h2>
+  <section id="game-screen" class="hidden battle-screen" role="region" aria-label="Pantalla de juego">
+    <h1 class="game-title battle-title" role="heading" aria-level="1">⚔️ The Tiny Realms ⚔️</h1>
+    <h2 class="game-subtitle" role="heading" aria-level="2">Batalla en curso</h2>
     <div id="players-container">
       <!-- Tarjetas de jugador -->
     </div>
+    <footer class="battle-footer">
+      <p class="footer-text">© 2025 The Tiny Realms</p>
+    </footer>
   </section>
 
-  <button id="reset-button" aria-label="Reiniciar Partida">
+  <!-- Botón de reinicio flotante, fuera de cualquier contenedor -->
+  <button id="reset-button" class="reset-btn-battle-global" aria-label="Reiniciar Partida">
     <img src="media/iconos/reinicio.png" alt="Reiniciar">
   </button>
+
   <!-- Script principal -->
   <script src="js/main.js"></script>
 </body>

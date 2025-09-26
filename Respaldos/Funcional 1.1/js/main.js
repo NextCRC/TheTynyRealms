@@ -1,14 +1,12 @@
-
-// Nombres por género
-const GENDER_NAMES = {
-  warrior: { m: "Guerrero", f: "Guerrera" },
-  cleric: { m: "Clérigo", f: "Clériga" },
-  thief: { m: "Ladrón", f: "Ladrona" },
-  wizard: { m: "Hechicero", f: "Hechicera" },
-  ranger: { m: "Explorador", f: "Exploradora" }
+// Configuración y constantes
+const CONFIG = {
+  ICON_PATH: "media/iconos/",
+  AVATAR_PATH: "media/avatar/",
+  SOUND_PATH: "media/sonidos/",
+  MAX_LIFE: 260,
+  COUNTER_TIMEOUT: 2500
 };
 
-// Declaración de personajes (CHARACTERS)
 const CHARACTERS = {
   warrior: { name: "Guerrero", vida: 60, color: "warrior", icon: "guerrerom.png" },
   cleric: { name: "Clérigo", vida: 55, color: "cleric", icon: "clerigom.png" },
@@ -17,7 +15,15 @@ const CHARACTERS = {
   ranger: { name: "Explorador", vida: 58, color: "ranger", icon: "exploradorm.png" }
 };
 
-// Clase GameState necesaria para el funcionamiento
+const GENDER_NAMES = {
+  warrior: { m: "Guerrero", f: "Guerrera" },
+  cleric: { m: "Clérigo", f: "Clériga" },
+  thief: { m: "Ladrón", f: "Ladrona" },
+  wizard: { m: "Hechicero", f: "Hechicera" },
+  ranger: { m: "Explorador", f: "Exploradora" }
+};
+
+// Estado global de la aplicación
 class GameState {
   constructor() {
     this.players = [];
@@ -31,10 +37,12 @@ class GameState {
     try {
       const damageSound = new Audio(`${CONFIG.SOUND_PATH}damage.mp3`);
       const healSound = new Audio(`${CONFIG.SOUND_PATH}heal.mp3`);
+      
       damageSound.playbackRate = 1.5;
       healSound.playbackRate = 1.5;
       damageSound.volume = 0.7;
       healSound.volume = 0.7;
+
       return { damage: damageSound, heal: healSound };
     } catch (error) {
       console.warn('No se pudieron cargar los sonidos:', error);
@@ -63,14 +71,6 @@ class GameState {
     });
   }
 }
-// Configuración y constantes
-const CONFIG = {
-  ICON_PATH: "media/iconos/",
-  AVATAR_PATH: "media/avatar/",
-  SOUND_PATH: "media/sonidos/",
-  MAX_LIFE: 260,
-  COUNTER_TIMEOUT: 2500
-};
 
 // Inicializar estado global
 const gameState = new GameState();
@@ -79,22 +79,12 @@ const gameState = new GameState();
 const elements = {
   playerCountSelect: document.getElementById("player-count"),
   useCharactersCheckbox: document.getElementById("use-characters"),
-  // playerInputsContainer: document.getElementById("player-inputs"),
+  playerInputsContainer: document.getElementById("player-inputs"),
   startButton: document.getElementById("start-button"),
   resetButton: document.getElementById("reset-button"),
   setupScreen: document.getElementById("setup-screen"),
   gameScreen: document.getElementById("game-screen"),
-  playersContainer: document.getElementById("players-container"),
-  setupInitial: document.getElementById('setup-initial'),
-  playerStep: document.getElementById('player-step'),
-  playerStepTitle: document.getElementById('player-step-title'),
-  playerNameInput: document.getElementById('player-name'),
-  characterSelectGroup: document.getElementById('character-select-group'),
-  playerCharacterSelect: document.getElementById('player-character'),
-  nextSetupBtn: document.getElementById('next-setup'),
-  nextPlayerBtn: document.getElementById('next-player'),
-  playerSummary: document.getElementById('player-summary'),
-  summaryList: document.getElementById('summary-list')
+  playersContainer: document.getElementById("players-container")
 };
 
 // Utilidades
@@ -156,6 +146,134 @@ class CounterManager {
       gameState.counters[playerId] = 0;
       gameState.directions[playerId] = null;
     }, CONFIG.COUNTER_TIMEOUT);
+  }
+}
+
+// Gestión de jugadores
+class PlayerManager {
+  static renderPlayerInputs() {
+    const count = parseInt(elements.playerCountSelect.value);
+    const useCharacters = elements.useCharactersCheckbox.checked;
+    elements.playerInputsContainer.innerHTML = "";
+
+    for (let i = 1; i <= count; i++) {
+      const wrapper = document.createElement("div");
+      wrapper.classList.add("form-group", "fade-in");
+      wrapper.style.animationDelay = `${i * 0.1}s`;
+
+      // Input de nombre
+      const nameLabel = document.createElement("label");
+      nameLabel.textContent = `👤 Jugador ${i}:`;
+      nameLabel.classList.add("form-label");
+
+      const nameInput = document.createElement("input");
+      nameInput.type = "text";
+      nameInput.id = `player-name-${i}`;
+      nameInput.classList.add("input-medieval");
+      nameInput.placeholder = `Nombre del jugador ${i}`;
+      nameInput.setAttribute("aria-label", `Nombre del Jugador ${i}`);
+
+      wrapper.appendChild(nameLabel);
+      wrapper.appendChild(nameInput);
+
+      // Selector de personaje
+      if (useCharacters) {
+        const selectLabel = document.createElement("label");
+        selectLabel.textContent = "⚔️ Personaje:";
+        selectLabel.classList.add("form-label");
+
+        const select = document.createElement("select");
+        select.id = `character-select-${i}`;
+        select.classList.add("input-medieval");
+        select.setAttribute("aria-label", `Personaje del Jugador ${i}`);
+
+        // Opción por defecto
+        const defaultOption = document.createElement("option");
+        defaultOption.value = "";
+        defaultOption.textContent = "Seleccionar personaje...";
+        select.appendChild(defaultOption);
+
+        // Opciones de personajes
+        Object.entries(CHARACTERS).forEach(([key, character]) => {
+          const option = document.createElement("option");
+          option.value = key;
+          option.textContent = `${character.name} (❤️ ${character.vida})`;
+          select.appendChild(option);
+        });
+
+        wrapper.appendChild(selectLabel);
+        wrapper.appendChild(select);
+      }
+
+      elements.playerInputsContainer.appendChild(wrapper);
+    }
+  }
+
+  static validatePlayerSetup() {
+    const count = parseInt(elements.playerCountSelect.value);
+    const useCharacters = elements.useCharactersCheckbox.checked;
+    const usedCharacters = new Set();
+    const errors = [];
+
+    for (let i = 1; i <= count; i++) {
+      const nameInput = document.getElementById(`player-name-${i}`);
+      const name = nameInput.value.trim();
+      
+      if (!name) {
+        errors.push(`Falta el nombre del Jugador ${i}`);
+        nameInput.focus();
+        continue;
+      }
+
+      if (useCharacters) {
+        const select = document.getElementById(`character-select-${i}`);
+        const character = select.value;
+        
+        if (!character) {
+          errors.push(`Selecciona un personaje para ${name}`);
+          continue;
+        }
+        
+        if (usedCharacters.has(character)) {
+          errors.push(`El personaje "${CHARACTERS[character].name}" ya fue elegido`);
+          continue;
+        }
+        
+        usedCharacters.add(character);
+      }
+    }
+
+    return errors;
+  }
+
+  static createPlayerData() {
+    const count = parseInt(elements.playerCountSelect.value);
+    const useCharacters = elements.useCharactersCheckbox.checked;
+    const players = [];
+    
+    // Avatares genéricos disponibles
+    const genericAvatars = utils.shuffleArray(
+      Array.from({ length: 8 }, (_, i) => `generico${i + 1}.png`)
+    );
+
+    for (let i = 1; i <= count; i++) {
+      const name = document.getElementById(`player-name-${i}`).value.trim();
+      let character = null;
+      let avatar = null;
+      let vida = 50; // Vida por defecto
+
+      if (useCharacters) {
+        character = document.getElementById(`character-select-${i}`).value;
+        avatar = CHARACTERS[character].icon;
+        vida = CHARACTERS[character].vida;
+      } else {
+        avatar = genericAvatars[i - 1];
+      }
+
+      players.push({ id: i, name, character, vida, avatar, maxVida: vida });
+    }
+
+    return players;
   }
 }
 
@@ -395,9 +513,21 @@ class EventManager {
       return;
     }
 
-  // Solo atajos de teclado y botón de reinicio para el flujo uno a uno
-  elements.resetButton.addEventListener("click", this.handleGameReset);
-  document.addEventListener("keydown", this.handleKeyboardShortcuts);
+    // Event listeners para configuración
+    elements.playerCountSelect.addEventListener("change", PlayerManager.renderPlayerInputs);
+    elements.useCharactersCheckbox.addEventListener("change", PlayerManager.renderPlayerInputs);
+
+    // Botón de inicio
+    elements.startButton.addEventListener("click", this.handleGameStart);
+
+    // Botón de reinicio
+    elements.resetButton.addEventListener("click", this.handleGameReset);
+
+    // Atajos de teclado
+    document.addEventListener("keydown", this.handleKeyboardShortcuts);
+
+    // Inicializar inputs
+    PlayerManager.renderPlayerInputs();
   }
 
   static handleGameStart() {
@@ -414,7 +544,6 @@ class EventManager {
     // Transición de pantallas
     elements.setupScreen.classList.add("hidden");
     elements.gameScreen.classList.remove("hidden");
-    document.body.classList.add("in-battle"); // Agregar clase para distinguir modo batalla
 
     // Renderizar tarjetas con delay
     setTimeout(() => {
@@ -434,27 +563,17 @@ class EventManager {
     // Transición de pantallas
     elements.gameScreen.classList.add("hidden");
     elements.setupScreen.classList.remove("hidden");
-    document.body.classList.remove("in-battle"); // Quitar clase de modo batalla
 
-    // Limpiar estado y volver al paso inicial del flujo uno a uno
+    // Limpiar estado
     elements.playersContainer.innerHTML = "";
+    elements.playerInputsContainer.innerHTML = "";
     gameState.players = [];
     gameState.resetCounters();
-    // Mostrar solo la pantalla inicial
-    elements.setupInitial.classList.remove('hidden');
-    elements.playerStep.classList.add('hidden');
-    elements.playerSummary.classList.add('hidden');
-    // Resetear variables de flujo
-    totalPlayers = 4;
-    useCharacters = false;
-    currentPlayer = 1;
-    playersData = [];
-    // Resetear selects y checkboxes
-    elements.playerCountSelect.value = "4";
-    elements.useCharactersCheckbox.checked = false;
-    // Limpiar campos de input
-    elements.playerNameInput.value = '';
-    elements.playerCharacterSelect.value = '';
+
+    // Regenerar inputs
+    setTimeout(() => {
+      PlayerManager.renderPlayerInputs();
+    }, 200);
   }
 
   static handleKeyboardShortcuts(e) {
@@ -474,105 +593,6 @@ class EventManager {
     }
   }
 }
-
-// Variables para el flujo
-let totalPlayers = 4;
-let useCharacters = false;
-let currentPlayer = 1;
-let playersData = [];
-
-// Paso 1: Selección inicial
-elements.nextSetupBtn.addEventListener('click', () => {
-  console.log('Botón Continuar presionado');
-  totalPlayers = parseInt(elements.playerCountSelect.value, 10);
-  useCharacters = elements.useCharactersCheckbox.checked;
-  elements.setupInitial.classList.add('hidden');
-  elements.playerStep.classList.remove('hidden');
-  currentPlayer = 1;
-  playersData = [];
-  updatePlayerStep();
-});
-
-// Paso 2: Inputs uno por uno
-function updatePlayerStep() {
-  elements.playerStepTitle.textContent = `Jugador ${currentPlayer}`;
-  elements.playerNameInput.value = '';
-  if (useCharacters) {
-    elements.characterSelectGroup.style.display = '';
-    elements.playerCharacterSelect.value = '';
-  } else {
-    elements.characterSelectGroup.style.display = 'none';
-  }
-}
-
-elements.nextPlayerBtn.addEventListener('click', () => {
-  const name = elements.playerNameInput.value.trim();
-  if (!name) {
-    alert('Por favor ingresa un nombre.');
-    return;
-  }
-  let character = '';
-  if (useCharacters) {
-    character = elements.playerCharacterSelect.value;
-    if (!character) {
-      alert('Selecciona un personaje.');
-      return;
-    }
-  }
-  playersData.push({ name, character });
-  if (currentPlayer < totalPlayers) {
-    currentPlayer++;
-    updatePlayerStep();
-  } else {
-    elements.playerStep.classList.add('hidden');
-    showSummary();
-  }
-});
-
-// Paso 3: Resumen final
-function showSummary() {
-  elements.summaryList.innerHTML = '';
-  playersData.forEach((p, idx) => {
-    const li = document.createElement('li');
-    li.textContent = useCharacters
-      ? `Jugador ${idx + 1}: ${p.name} (${p.character})`
-      : `Jugador ${idx + 1}: ${p.name}`;
-    elements.summaryList.appendChild(li);
-  });
-  elements.playerSummary.classList.remove('hidden');
-}
-
-// Paso 4: Iniciar partida
-elements.startButton.addEventListener('click', () => {
-  elements.playerSummary.classList.add('hidden');
-  elements.gameScreen.classList.remove('hidden');
-
-  // Transformar playersData en el formato esperado por CardManager
-  gameState.players = playersData.map((p, idx) => {
-    let vida = 50, avatar = `generico${(idx % 8) + 1}.png`, maxVida = 50, characterName = "Aventurero";
-    if (useCharacters && CHARACTERS[p.character]) {
-      vida = CHARACTERS[p.character].vida;
-      avatar = CHARACTERS[p.character].icon;
-      maxVida = CHARACTERS[p.character].vida;
-      characterName = CHARACTERS[p.character].name;
-    }
-    return {
-      id: idx + 1,
-      name: p.name,
-      character: p.character,
-      vida,
-      avatar,
-      maxVida,
-      characterName
-    };
-  });
-
-  // Renderizar tarjetas de jugador
-  CardManager.renderPlayerCards();
-
-  // Reset contadores visuales
-  gameState.resetCounters();
-});
 
 // Inicialización de la aplicación
 document.addEventListener("DOMContentLoaded", () => {

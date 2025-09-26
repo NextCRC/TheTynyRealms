@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Tiny Realms</title>
+
+  <!-- Fuentes medievales -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=MedievalSharp&display=swap" rel="stylesheet" />
+
+  <style>
+    /* Variables CSS para colores y temas */
+    :root {
+      --bg-primary: #1a1a1a;
+      --bg-secondary: #2e2e2e;
+      --border-primary: #8b0000;
+      --text-primary: #f5f5dc;
+      --shadow-glow: rgba(255, 255, 255, 0.1);
+      --warrior: rgba(127, 29, 29, 0.5);
+      --cleric: rgba(199, 240, 49, 0.5);
+      --thief: rgba(48, 122, 226, 0.5);
+      --wizard: rgba(107, 33, 168, 0.5);
+      --ranger: rgba(62, 179, 44, 0.5);
+    }
+
+    /* Reset básico */
+    * {
+      box-sizing: border-box;
+    }
+
+    .hidden { 
+      display: none !important; 
+    }
+
+    /* Tipografía y estilos base */
+    body {
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
+      font-family: 'Cinzel', serif;
+      color: var(--text-primary);
+      font-size: 18px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    h1, h2, h3 {
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+      margin: 0;
+    }
+
+    /* Contenedores principales */
+    .screen-container {
+      width: 100%;
+      max-width: 95vw;
+      padding: 2rem;
+      border-radius: 16px;
+      background: linear-gradient(145deg, var(--bg-secondary), #3a3a3a);
+      border: 3px solid var(--border-primary);
+      box-shadow: 
+        0 0 30px var(--shadow-glow),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+      text-align: center;
+    }
+
+    .game-title {
+      font-size: 2.25rem;
+      line-height: 2.5rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .game-subtitle {
+      font-size: 1.875rem;
+      line-height: 2.25rem;
+      margin-bottom: 1.5rem;
+      text-align: center;
+      font-weight: 600;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    }
+
+    .setup-form {
+      max-width: 28rem;
+      margin: 0 auto;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.75rem;
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .checkbox-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      gap: 0.75rem;
+      margin: 1rem 0;
+    }
+
+    .checkbox-container input[type="checkbox"] {
+      width: 1.25rem;
+      height: 1.25rem;
+      accent-color: var(--border-primary);
+    }
+
+    .checkbox-label {
+      font-size: 1.125rem;
+      line-height: 1.75rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .player-inputs {
+      margin-bottom: 1rem;
+    }
+
+    .start-btn {
+      width: 100%;
+      margin-top: 2rem;
+    }
+
+    .reset-btn {
+      position: fixed;
+      bottom: 1.5rem;
+      left: 1.5rem;
+      z-index: 1000;
+    }
+
+    /* Inputs y controles */
+    .input-medieval {
+      font-family: 'MedievalSharp', cursive;
+      background: linear-gradient(145deg, var(--bg-secondary), #3a3a3a);
+      color: var(--text-primary);
+      border: 2px solid var(--border-primary);
+      padding: 12px 16px;
+      border-radius: 8px;
+      width: 100%;
+      max-width: 300px;
+      margin: 8px auto;
+      display: block;
+      transition: all 0.3s ease;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
+      font-size: 16px;
+    }
+
+    .input-medieval:focus {
+      outline: none;
+      border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.3);
+    }
+
+    .input-medieval option {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      padding: 8px;
+    }
+
+    /* Botones */
+    .btn-primary, .btn-secondary {
+      font-family: 'Cinzel', serif;
+      font-weight: 600;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      font-size: 16px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(145deg, var(--border-primary), #a52a2a);
+      color: var(--text-primary);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(145deg, #a52a2a, #cd5c5c);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    .btn-secondary {
+      background: linear-gradient(145deg, #444, #666);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover {
+      background: linear-gradient(145deg, #666, #888);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+    }
+
+    /* Tarjetas de jugador */
+    .player-card {
+      position: relative;
+      width: 280px;
+      aspect-ratio: 9 / 12;
+      background: linear-gradient(145deg, #2a2a2a, #3a3a3a);
+      border: 3px solid #666;
+      border-radius: 16px;
+      padding: 20px;
+      margin: 10px;
+      color: var(--text-primary);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+    }
+
+    .player-card:hover {
+      transform: translateY(-5px) scale(1.02);
+      box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+    }
+
+    .life-display {
+      position: absolute;
+      top: 12px;
+      left: 12px;
+      font-size: 2.8rem;
+      font-weight: 600;
+      z-index: 10;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 4px 8px;
+      border-radius: 8px;
+      min-width: 60px;
+      text-align: center;
+    }
+
+    .player-name {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.3rem;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 4px 12px;
+      border-radius: 20px;
+      max-width: 90%;
+    }
+
+    .avatar-icon {
+      width: 140px;
+      height: 140px;
+      background: #555;
+      border-radius: 50%;
+      margin: 20px auto;
+      display: block;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 3rem;
+    }
+
+    .avatar-icon:hover {
+      transform: scale(1.1);
+    }
+
+    .character-name {
+      position: absolute;
+      bottom: 80px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.1rem;
+      font-style: italic;
+      background: rgba(0, 0, 0, 0.6);
+      padding: 4px 12px;
+      border-radius: 12px;
+    }
+
+    .action-btn {
+      position: absolute;
+      bottom: 12px;
+      width: 50px;
+      height: 50px;
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      transition: all 0.3s ease;
+    }
+
+    .btn-damage {
+      left: 12px;
+      background: linear-gradient(145deg, #8b0000, #a52a2a);
+      color: white;
+    }
+
+    .btn-heal {
+      right: 12px;
+      background: linear-gradient(145deg, #228b22, #32cd32);
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.1);
+    }
+
+    #players-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 24px;
+      padding: 20px;
+    }
+
+    /* Tintado por personaje */
+    .warrior { box-shadow: inset 0 0 100px var(--warrior), 0 8px 16px rgba(0, 0, 0, 0.4); }
+    .cleric { box-shadow: inset 0 0 100px var(--cleric), 0 8px 16px rgba(0, 0, 0, 0.4); }
+    .thief { box-shadow: inset 0 0 100px var(--thief), 0 8px 16px rgba(0, 0, 0, 0.4); }
+    .wizard { box-shadow: inset 0 0 100px var(--wizard), 0 8px 16px rgba(0, 0, 0, 0.4); }
+    .ranger { box-shadow: inset 0 0 100px var(--ranger), 0 8px 16px rgba(0, 0, 0, 0.4); }
+
+    .fade-in {
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .critical-health {
+      animation: pulseRed 2s infinite;
+    }
+
+    @keyframes pulseRed {
+      0%, 100% { color: var(--text-primary); }
+      50% { color: #ff4444; text-shadow: 0 0 10px #ff4444; }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .screen-container {
+        padding: 1rem;
+      }
+      
+      .player-card {
+        width: 240px;
+      }
+      
+      .game-title {
+        font-size: 1.8rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Pantalla de configuración -->
+  <section id="setup-screen" class="screen-container fade-in">
+    <h1 class="game-title">⚔️ The Tiny Realms ⚔️</h1>
+    
+    <div class="setup-form">
+      <div class="form-group">
+        <label for="player-count" class="form-label">Cantidad de jugadores:</label>
+        <select id="player-count" class="input-medieval" aria-label="Cantidad de jugadores">
+          <option value="2">2 Jugadores</option>
+          <option value="3">3 Jugadores</option>
+          <option value="4" selected>4 Jugadores</option>
+          <option value="5">5 Jugadores</option>
+          <option value="6">6 Jugadores</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-container">
+          <input type="checkbox" id="use-characters" aria-label="Usar personajes">
+          <span class="checkbox-label">🧙‍♂️ Usar personajes especiales</span>
+        </label>
+      </div>
+
+      <div id="player-inputs" class="player-inputs">
+        <!-- Inputs dinámicos -->
+      </div>
+
+      <button id="start-button" class="btn-primary start-btn" aria-label="Iniciar Juego">
+        🎮 Iniciar Partida
+      </button>
+    </div>
+  </section>
+
+  <!-- Pantalla de juego -->
+  <section id="game-screen" class="hidden screen-container fade-in">
+    <h2 class="game-subtitle">⚔️ Batalla en curso ⚔️</h2>
+    <div id="players-container">
+      <!-- Tarjetas de jugador -->
+    </div>
+  </section>
+
+  <button id="reset-button" class="btn-secondary reset-btn" aria-label="Reiniciar Partida">
+    🔄 Nueva Partida
+  </button>
+
+  <script>
+    // Configuración simplificada
+    const CONFIG = {
+      MAX_LIFE: 260,
+      COUNTER_TIMEOUT: 2500
+    };
+
+    const CHARACTERS = {
+      warrior: { name: "Guerrero", vida: 60, color: "warrior", emoji: "🗡️" },
+      cleric: { name: "Clérigo", vida: 55, color: "cleric", emoji: "⚡" },
+      thief: { name: "Ladrón", vida: 52, color: "thief", emoji: "🗡️" },
+      wizard: { name: "Hechicero", vida: 50, color: "wizard", emoji: "🔮" },
+      ranger: { name: "Explorador", vida: 58, color: "ranger", emoji: "🏹" }
+    };
+
+    let gameState = {
+      players: []
+    };
+
+    // Elementos DOM
+    const elements = {
+      playerCountSelect: document.getElementById("player-count"),
+      useCharactersCheckbox: document.getElementById("use-characters"),
+      playerInputsContainer: document.getElementById("player-inputs"),
+      startButton: document.getElementById("start-button"),
+      resetButton: document.getElementById("reset-button"),
+      setupScreen: document.getElementById("setup-screen"),
+      gameScreen: document.getElementById("game-screen"),
+      playersContainer: document.getElementById("players-container")
+    };
+
+    // Generar inputs de jugadores
+    function renderPlayerInputs() {
+      const count = parseInt(elements.playerCountSelect.value);
+      const useCharacters = elements.useCharactersCheckbox.checked;
+      elements.playerInputsContainer.innerHTML = "";
+
+      for (let i = 1; i <= count; i++) {
+        const wrapper = document.createElement("div");
+        wrapper.classList.add("form-group", "fade-in");
+
+        const nameLabel = document.createElement("label");
+        nameLabel.textContent = `👤 Jugador ${i}:`;
+        nameLabel.classList.add("form-label");
+
+        const nameInput = document.createElement("input");
+        nameInput.type = "text";
+        nameInput.id = `player-name-${i}`;
+        nameInput.classList.add("input-medieval");
+        nameInput.placeholder = `Nombre del jugador ${i}`;
+
+        wrapper.appendChild(nameLabel);
+        wrapper.appendChild(nameInput);
+
+        if (useCharacters) {
+          const selectLabel = document.createElement("label");
+          selectLabel.textContent = "⚔️ Personaje:";
+          selectLabel.classList.add("form-label");
+
+          const select = document.createElement("select");
+          select.id = `character-select-${i}`;
+          select.classList.add("input-medieval");
+
+          const defaultOption = document.createElement("option");
+          defaultOption.value = "";
+          defaultOption.textContent = "Seleccionar personaje...";
+          select.appendChild(defaultOption);
+
+          Object.entries(CHARACTERS).forEach(([key, character]) => {
+            const option = document.createElement("option");
+            option.value = key;
+            option.textContent = `${character.name} (❤️ ${character.vida})`;
+            select.appendChild(option);
+          });
+
+          wrapper.appendChild(selectLabel);
+          wrapper.appendChild(select);
+        }
+
+        elements.playerInputsContainer.appendChild(wrapper);
+      }
+    }
+
+    // Crear tarjetas de jugadores
+    function renderPlayerCards() {
+      elements.playersContainer.innerHTML = "";
+      gameState.players.forEach(player => {
+        const card = createPlayerCard(player);
+        elements.playersContainer.appendChild(card);
+      });
+    }
+
+    function createPlayerCard(player) {
+      const card = document.createElement("div");
+      card.classList.add("player-card", "fade-in");
+      card.id = `card-${player.id}`;
+
+      if (player.character) {
+        card.classList.add(CHARACTERS[player.character].color);
+      }
+
+      // Vida
+      const vidaDisplay = document.createElement("p");
+      vidaDisplay.id = `life-${player.id}`;
+      vidaDisplay.classList.add("life-display");
+      vidaDisplay.textContent = player.vida;
+
+      // Nombre
+      const playerName = document.createElement("div");
+      playerName.classList.add("player-name");
+      playerName.textContent = player.name;
+
+      // Avatar (emoji simple)
+      const avatar = document.createElement("div");
+      avatar.classList.add("avatar-icon");
+      avatar.textContent = player.character ? CHARACTERS[player.character].emoji : "👤";
+
+      // Personaje
+      const characterName = document.createElement("div");
+      characterName.classList.add("character-name");
+      characterName.textContent = player.character ? CHARACTERS[player.character].name : "Aventurero";
+
+      // Botones
+      const btnDamage = document.createElement("button");
+      btnDamage.classList.add("action-btn", "btn-damage");
+      btnDamage.textContent = "⚔️";
+      btnDamage.addEventListener("click", () => updateLife(player.id, -1));
+
+      const btnHeal = document.createElement("button");
+      btnHeal.classList.add("action-btn", "btn-heal");
+      btnHeal.textContent = "🧪";
+      btnHeal.addEventListener("click", () => updateLife(player.id, 1));
+
+      card.appendChild(vidaDisplay);
+      card.appendChild(playerName);
+      card.appendChild(avatar);
+      card.appendChild(characterName);
+      card.appendChild(btnDamage);
+      card.appendChild(btnHeal);
+
+      return card;
+    }
+
+    function updateLife(playerId, delta) {
+      const player = gameState.players.find(p => p.id === playerId);
+      if (!player) return;
+
+      player.vida = Math.max(0, Math.min(player.vida + delta, CONFIG.MAX_LIFE));
+      const vidaEl = document.getElementById(`life-${playerId}`);
+      vidaEl.textContent = player.vida;
+
+      if (player.vida <= 10 && player.vida > 0) {
+        vidaEl.classList.add("critical-health");
+      } else {
+        vidaEl.classList.remove("critical-health");
+      }
+
+      if (player.vida <= 0) {
+        const card = document.getElementById(`card-${playerId}`);
+        card.style.opacity = "0.6";
+        card.style.filter = "grayscale(70%)";
+      }
+    }
+
+    // Event listeners
+    elements.playerCountSelect.addEventListener("change", renderPlayerInputs);
+    elements.useCharactersCheckbox.addEventListener("change", renderPlayerInputs);
+
+    elements.startButton.addEventListener("click", () => {
+      const count = parseInt(elements.playerCountSelect.value);
+      const useCharacters = elements.useCharactersCheckbox.checked;
+      const players = [];
+
+      for (let i = 1; i <= count; i++) {
+        const name = document.getElementById(`player-name-${i}`).value.trim();
+        if (!name) {
+          alert(`Falta el nombre del Jugador ${i}`);
+          return;
+        }
+
+        let character = null;
+        let vida = 50;
+
+        if (useCharacters) {
+          character = document.getElementById(`character-select-${i}`).value;
+          if (!character) {
+            alert(`Selecciona un personaje para ${name}`);
+            return;
+          }
+          vida = CHARACTERS[character].vida;
+        }
+
+        players.push({ id: i, name, character, vida, maxVida: vida });
+      }
+
+      gameState.players = players;
+      elements.setupScreen.classList.add("hidden");
+      elements.gameScreen.classList.remove("hidden");
+      renderPlayerCards();
+    });
+
+    elements.resetButton.addEventListener("click", () => {
+      elements.gameScreen.classList.add("hidden");
+      elements.setupScreen.classList.remove("hidden");
+      elements.playersContainer.innerHTML = "";
+      renderPlayerInputs();
+    });
+
+    // Inicializar
+    renderPlayerInputs();
+  </script>
+</body>
+</html>
