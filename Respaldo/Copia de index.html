@@ -1,0 +1,1582 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Tiny Realms - Contador de Jefe</title>
+
+    <!-- Fuentes medievales -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=MedievalSharp&display=swap" rel="stylesheet" />
+
+    <style>
+        /* Variables CSS para colores y temas */
+        :root {
+            --bg-primary: #1a1a1a;
+            --bg-secondary: #2e2e2e;
+            --border-primary: #8b0000;
+            --text-primary: #f5f5dc;
+            --shadow-glow: rgba(255, 255, 255, 0.1);
+            --warrior: rgba(127, 29, 29, 0.5);
+            --cleric: rgba(199, 240, 49, 0.5);
+            --thief: rgba(48, 122, 226, 0.5);
+            --wizard: rgba(107, 33, 168, 0.5);
+            --ranger: rgba(62, 179, 44, 0.5);
+            --boss-border: #4a4a4a;
+            --boss-glow: rgba(139, 0, 0, 0.8);
+            
+            /* Dimensiones Clave AMPLIADAS para el Layout Horizontal de Jugador */
+            --player-card-width: 420px; 
+            --player-card-height: 220px; 
+            --player-card-gap: 25px; 
+            
+            /* Altura deseada para la tarjeta central: (2 * altura de tarjeta) + (1 * gap) */
+            --central-card-height: calc(2 * var(--player-card-height) + var(--player-card-gap));
+        }
+
+        /* Reset básico */
+        * {
+            box-sizing: border-box;
+        }
+
+        /* Clases básicas necesarias */
+        .hidden {
+            display: none !important;
+        }
+
+        /* Tipografía y estilos base */
+        @keyframes medievalAmbience {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
+            background-size: 400% 400%;
+            animation: medievalAmbience 20s ease infinite;
+            font-family: 'Cinzel', serif;
+            color: var(--text-primary);
+            font-size: 18px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow-x: hidden;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M0 0h100v100H0z' fill='%23111'/%3E%3Cpath d='M20 20l60 0l0 60l-60 0z' fill='%23222'/%3E%3C/svg%3E");
+            background-size: 50px 50px;
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        h1, h2, h3 {
+            font-weight: 600;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            margin: 0;
+        }
+
+        /* --- Global Container Styles (Setup Screen) --- */
+
+        .screen-container {
+            width: 95%;
+            max-width: 600px;
+            padding: 2rem;
+            border-radius: 16px;
+            background: linear-gradient(145deg, var(--bg-secondary), #3a3a3a);
+            border: double 8px var(--border-primary);
+            box-shadow: 0 0 30px var(--shadow-glow), inset 0 0 50px rgba(139, 0, 0, 0.2);
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            text-align: center;
+            margin: 20px auto;
+            position: relative; /* For the medieval corners */
+        }
+        
+        /* Medieval Corners (Simplified/Emoji for single file) */
+        .screen-container::before,
+        .screen-container::after {
+            content: "✦";
+            position: absolute;
+            font-size: 20px;
+            color: var(--border-primary);
+            text-shadow: 0 0 5px #d4af37;
+        }
+        
+        .screen-container::before { top: 4px; left: 4px; }
+        .screen-container::after { bottom: 4px; right: 4px; }
+
+        .game-title {
+            font-size: 2.25rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.75rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+
+        /* Inputs */
+        .input-medieval {
+            font-family: 'MedievalSharp', cursive;
+            background: linear-gradient(145deg, #2d1810, #1a1a1a);
+            color: var(--text-primary);
+            border: double 4px var(--border-primary);
+            padding: 12px 16px;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 300px;
+            margin: 8px auto;
+            display: block;
+            box-shadow: 0 0 12px rgba(139, 0, 0, 0.15), inset 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-size: 16px;
+            text-align: center;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(145deg, #d4af37, #ffdd57);
+            color: #1a1a1a;
+            border: 2px solid #8B6508;
+            margin-top: 1.5rem;
+        }
+        
+        .btn-secondary {
+            /* Estilo para el botón de cancelar en el modal/footer */
+            background: linear-gradient(145deg, #444, #666);
+            color: var(--text-primary);
+            border: 2px solid #888;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+            background: linear-gradient(145deg, #ffdd57, #d4af37);
+        }
+
+        /* --- Game Screen Layout (BOSS MODE) --- */
+        #game-screen {
+            width: 100vw;
+            min-height: 100vh;
+            padding: 20px;
+            padding-bottom: 80px; /* Espacio para el footer fijo */
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+
+        .game-subtitle {
+            width: 100%;
+            text-align: center;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+        
+        /* --- BATTLE LAYOUT CORE STYLES (NEW) --- */
+        .battle-container {
+            display: flex;
+            flex-direction: row;
+            justify-content: center; /* Centrar las tres columnas */
+            align-items: flex-start; /* Alinear arriba */
+            gap: var(--player-card-gap);
+            max-width: 1400px; 
+            width: 100%;
+            padding-bottom: 20px; /* Espacio antes del footer */
+        }
+
+        /* Columnas de Jugador: Pilas de tarjetas */
+        .player-card-group-left,
+        .player-card-group-right {
+            display: flex;
+            flex-direction: column;
+            gap: var(--player-card-gap);
+        }
+
+        /* Tarjeta Central: Altura calculada (Boss o Info) */
+        .central-card, .info-card {
+            width: 380px; 
+            height: var(--central-card-height); 
+            padding: 25px; 
+            border-radius: 16px;
+            position: relative;
+            z-index: 10;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+        }
+        /* --- FIN BATTLE LAYOUT CORE STYLES --- */
+
+
+        /* --- Tarjeta Central (Boss Styles) --- */
+        .central-card {
+            background: linear-gradient(145deg, #1e1e1e, #0c0c0c);
+            border: 5px solid var(--boss-border);
+            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            color: var(--text-primary);
+        }
+
+        .boss-header {
+            width: 100%;
+            text-align: center;
+            font-size: 1.8rem; 
+            font-weight: 600;
+            color: #ff4444;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px #ff0000;
+            margin-bottom: 15px;
+        }
+
+        .boss-avatar {
+            width: 180px; 
+            height: 180px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%238B0000"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>') no-repeat center;
+            background-size: contain;
+            filter: drop-shadow(0 0 5px #ff4444);
+            flex-shrink: 0;
+        }
+
+        .boss-name {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 2.2rem; 
+            color: #ddd;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 8px 20px;
+            border-radius: 10px;
+            border: 1px solid #333;
+            margin-top: 15px;
+            text-shadow: 1px 1px 3px #8b0000;
+        }
+
+        .boss-life-control {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0; 
+            width: 100%;
+        }
+
+        .boss-life-display {
+            font-size: 5rem; 
+            font-weight: 700;
+            color: #ff4444;
+            text-shadow: 0 0 15px #ff0000;
+            min-width: 140px;
+            text-align: center;
+        }
+
+        .boss-life-btn {
+            background: #444;
+            color: white;
+            border: 2px solid #555;
+            width: 55px; 
+            height: 55px;
+            border-radius: 50%;
+            font-size: 2.5rem; 
+            line-height: 1;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin: 0 15px; 
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+        }
+
+        .boss-life-btn:hover {
+            background: #666;
+            transform: scale(1.1);
+        }
+        
+        .boss-life-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* --- Info Card (Non-Boss Mode) --- */
+        .info-card {
+            background: linear-gradient(145deg, #3a3a3a, #2a2a2a);
+            border: 5px solid #d4af37;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5);
+            color: var(--text-primary);
+            gap: 20px; 
+        }
+        
+        .info-card h3 {
+            font-size: 1.8rem; 
+            color: #ffdd57;
+            border-bottom: 2px solid #ffdd57;
+            padding-bottom: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .info-card p {
+            font-family: 'MedievalSharp', cursive;
+            font-size: 1.2rem; 
+            margin: 8px 0;
+            color: #ccc;
+        }
+
+        /* --- Player Cards (Horizontal Layout) --- */
+        .player-card {
+            width: var(--player-card-width);
+            height: var(--player-card-height);
+            background: linear-gradient(145deg, #2a2a2a, #3a3a3a);
+            border: 3px solid #666;
+            border-radius: 16px;
+            padding: 10px;
+            color: var(--text-primary);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            /* Importante: Hacemos la tarjeta relative para posicionar el contador de vida absoluto */
+            position: relative; 
+            flex-shrink: 0;
+            margin: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Usamos CSS Grid para el layout de 3 columnas: Info | Vida | Acciones */
+            display: grid;
+            grid-template-columns: 1.3fr 1fr 0.7fr; 
+            align-items: center;
+        }
+
+        /* Contenedor del Avatar y Nombre (Columna izquierda) */
+        .player-info-side {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 5px 0;
+            position: relative; 
+        }
+        
+        /* Contenedor de Vida (Columna central) */
+        /* Eliminamos los estilos de flexbox para que solo exista el life-display */
+        .player-life-center {
+            position: relative;
+            height: 100%;
+            /* No necesitamos alinear si el elemento hijo es absoluto */
+        }
+
+        /* Contenedor de Botones (Columna derecha - REAJUSTADO) */
+        .player-action-side {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between; /* Espacio entre botones */
+            align-items: center;
+            height: 100%;
+            padding: 15px 0; /* Padding vertical para centrar el corazón entre botones */
+            position: relative;
+        }
+
+        /* Elementos de la columna Info */
+        .player-name {
+            position: relative;
+            order: -1; 
+            font-size: 1.1rem; 
+            font-weight: 600;
+            background: rgba(0, 0, 0, 0.8);
+            padding: 5px 12px;
+            border-radius: 15px;
+            margin-bottom: 8px; 
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        
+        .avatar-icon {
+            width: 100px; 
+            height: 100px;
+            object-fit: contain;
+            border-radius: 50%;
+            border: 3px solid rgba(255, 255, 255, 0.2); 
+            background: rgba(0, 0, 0, 0.1);
+            font-size: 60px; 
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .character-name {
+            font-size: 1rem; 
+            font-style: italic;
+            background: rgba(0, 0, 0, 0.6);
+            padding: 4px 10px;
+            border-radius: 8px;
+            margin-top: 8px; 
+            max-width: 100%;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center;
+        }
+        
+        /* --- Contadores de Vida y Corazón (Columna Central) --- */
+        
+        /* Vida GRANDE en el centro de la TARJETA (Centrado absoluto en la tarjeta) */
+        .life-display {
+            /* AJUSTE CLAVE: 
+                Lo posicionamos respecto a la tarjeta padre (.player-card), 
+                y movemos el centro horizontal al 50% del ancho de la tarjeta.
+            */
+            position: absolute; 
+            top: 50%;
+            left: 50%; /* Centro Horizontal de toda la tarjeta */
+            transform: translate(-50%, -50%); /* Ajuste de 50% de su propio tamaño */
+            
+            /* Aseguramos que se muestre sobre el grid de las 3 columnas */
+            grid-column: 1 / 4; /* Cubre todas las columnas del grid visualmente */
+            
+            font-size: 3.2rem; 
+            font-weight: 700;
+            z-index: 12;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.6);
+            padding: 6px 12px;
+            border-radius: 12px;
+            min-width: 70px;
+            text-align: center;
+        }
+        
+        /* --- Botones de Acción (Columna Derecha) --- */
+        /* Corazón pequeño entre botones */
+        .heart-icon-small {
+            font-size: 1.8rem; 
+            z-index: 10;
+            filter: drop-shadow(0 0 3px rgba(255, 0, 0, 0.4)); 
+            opacity: 0.8;
+            align-self: center; 
+            margin: 0;
+            transition: opacity 0.5s ease-in-out; /* Para la opacidad dinámica */
+        }
+
+        .action-btn {
+            position: relative; 
+            width: 60px; 
+            height: 60px;
+            font-size: 2rem; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+            border-radius: 50%;
+            transition: all 0.2s;
+        }
+        
+        /* Botón Curar (+1) */
+        .btn-heal {
+            background: linear-gradient(145deg, #228b22, #32cd32);
+        }
+
+        /* Botón Daño (-1) */
+        .btn-damage {
+            background: linear-gradient(145deg, #8b0000, #a52a2a);
+        }
+
+        /* Contador visual (Esquina superior de la TARJETA - ANIMACIÓN MEJORADA) */
+        .click-counter {
+            position: absolute;
+            top: 15px; 
+            right: 15px; 
+            font-size: 36px; 
+            font-weight: 700;
+            color: #ffffff;
+            background: rgba(0, 0, 0, 0.85);
+            padding: 8px 15px; 
+            border-radius: 18px;
+            pointer-events: none;
+            z-index: 20; 
+            opacity: 0;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); 
+            transition: opacity 0.3s ease;
+        }
+        
+        /* Ajuste de animación: Flota más arriba y dura 1.5s */
+        .click-counter.animate {
+            animation: floatUp 1.5s ease-out forwards;
+            opacity: 1;
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 0; transform: translateY(0px) scale(0.9); }
+            10% { opacity: 1; transform: translateY(-10px) scale(1.2); } 
+            100% { opacity: 0; transform: translateY(-60px) scale(1); } 
+        }
+
+        /* Indicador de vida crítica */
+        .critical-health { animation: pulseRedIntense 1.5s infinite; background: rgba(139, 0, 0, 0.8) !important; border-color: #ff4444 !important; }
+        @keyframes pulseRedIntense { 0%, 100% { color: var(--text-primary); box-shadow: 0 0 5px rgba(255, 68, 68, 0.3); } 50% { color: #ff4444; text-shadow: 0 0 15px #ff4444; box-shadow: 0 0 20px rgba(255, 68, 68, 0.6); } }
+        
+        /* Tintado por personaje */
+        .warrior { box-shadow: inset 0 0 40px var(--warrior), 0 8px 16px rgba(127, 29, 29, 0.4); border-color: rgba(127, 29, 29, 0.8); }
+        .cleric { box-shadow: inset 0 0 40px var(--cleric), 0 8px 16px rgba(199, 240, 49, 0.4); border-color: rgba(199, 240, 49, 0.8); }
+        .thief { box-shadow: inset 0 0 40px var(--thief), 0 8px 16px rgba(48, 122, 226, 0.4); border-color: rgba(48, 122, 226, 0.8); }
+        .wizard { box-shadow: inset 0 0 40px var(--wizard), 0 8px 16px rgba(107, 33, 168, 0.4); border-color: rgba(107, 33, 168, 0.8); }
+        .ranger { box-shadow: inset 0 0 40px var(--ranger), 0 8px 16px rgba(62, 179, 44, 0.4); border-color: rgba(62, 179, 44, 0.8); }
+
+
+        /* --- GAME FOOTER BAR (NUEVO) --- */
+        .game-footer-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 70px;
+            background: linear-gradient(to top, rgba(30, 20, 20, 1), rgba(30, 20, 20, 0.8));
+            border-top: 2px solid var(--border-primary);
+            box-shadow: 0 -5px 15px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 0 20px;
+            gap: 20px;
+            z-index: 1000;
+        }
+
+        .footer-btn-group {
+            display: flex;
+            gap: 15px;
+        }
+        
+        /* Alineación y tamaño uniforme para botones del footer */
+        .footer-btn, .game-footer-bar .btn-primary {
+            font-family: 'Cinzel', serif;
+            font-weight: 600;
+            padding: 10px 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+            font-size: 0.9rem;
+            
+            /* Ajustes de tamaño y alineación para uniformidad */
+            min-width: 140px; /* Tamaño mínimo */
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center; /* Centrar texto */
+            margin: 0; /* Eliminar margenes no deseados */
+        }
+        
+        .footer-btn {
+            background: linear-gradient(145deg, #444, #666);
+            color: var(--text-primary);
+            border: 2px solid #555;
+        }
+        
+        /* El botón principal de Reiniciar también toma la clase de estilo */
+        .game-footer-bar .btn-primary {
+            /* Sobrescribir el margin-top por defecto del .btn-primary en el footer */
+            margin: 0;
+        }
+
+        .footer-btn:hover {
+            background: linear-gradient(145deg, #666, #888);
+            transform: translateY(-1px);
+        }
+
+        /* --- Modal Styles (Custom) --- */
+        .custom-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .custom-modal-overlay.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .custom-modal-content {
+            background: linear-gradient(145deg, #2e2e2e, #3a3a3a);
+            border: 5px double var(--border-primary);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            max-width: 400px;
+            box-shadow: 0 0 30px rgba(139, 0, 0, 0.5);
+            transform: scale(0.8);
+            transition: transform 0.3s ease;
+        }
+
+        .custom-modal-overlay.visible .custom-modal-content {
+            transform: scale(1);
+        }
+
+        .modal-alert-icon {
+            font-size: 3rem;
+            margin-bottom: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 20px;
+            gap: 15px;
+        }
+
+        .modal-buttons .btn-primary, .modal-buttons .btn-secondary {
+            margin: 0;
+        }
+
+
+        /* --- Responsive Styles --- */
+        @media (max-width: 1024px) {
+            :root {
+                --player-card-width: 350px;
+                --player-card-height: 180px;
+            }
+            .central-card, .info-card {
+                width: 300px;
+            }
+            .avatar-icon { width: 80px; height: 80px; font-size: 50px; }
+            .action-btn { width: 50px; height: 50px; font-size: 1.5rem; }
+            .heart-icon-small { font-size: 4rem; }
+            .life-display { font-size: 2.8rem; }
+            .click-counter { font-size: 32px; }
+        }
+
+        @media (max-width: 768px) {
+            .player-card {
+                width: 95%; 
+                height: 150px; 
+                grid-template-columns: 1fr 1fr 0.5fr; 
+                padding: 5px;
+            }
+            
+            :root {
+                --player-card-height: 150px;
+                --central-card-height: calc(2 * var(--player-card-height) + var(--player-card-gap));
+            }
+            
+            .avatar-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 40px;
+            }
+            .character-name {
+                font-size: 0.8rem;
+            }
+            .player-name {
+                font-size: 0.9rem;
+            }
+            .action-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 1.2rem;
+            }
+            .life-display {
+                font-size: 2.2rem;
+            }
+            .heart-icon-small {
+                font-size: 3rem;
+            }
+            .click-counter {
+                font-size: 24px;
+                padding: 5px 10px;
+                top: 5px;
+                right: 5px;
+            }
+            .game-footer-bar {
+                height: 60px;
+            }
+            .footer-btn, .game-footer-bar .btn-primary {
+                padding: 8px 12px;
+                font-size: 0.8rem;
+                min-width: 100px;
+                height: 40px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Modal de confirmación personalizado -->
+    <div id="custom-modal-overlay" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <div class="modal-alert-icon" id="modal-icon"></div>
+            <h3 id="modal-title"></h3>
+            <p id="modal-message"></p>
+            <div class="modal-buttons" id="modal-buttons">
+                <!-- Botones se inyectan aquí -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Pantalla de configuración (Mantenemos el flujo mejorado uno a uno) -->
+    <section id="setup-screen" class="screen-container fade-in" role="region" aria-label="Configuración del juego">
+        <h1 class="game-title">⚔️ The Tiny Realms ⚔️</h1>
+        <div id="setup-initial" class="setup-form">
+            <div class="form-group">
+                <label for="player-count" class="form-label">Cantidad de jugadores:</label>
+                <select id="player-count" class="input-medieval" aria-label="Cantidad de jugadores">
+                    <option value="1">1 Jugador</option>
+                    <option value="2">2 Jugadores</option>
+                    <option value="3">3 Jugadores</option>
+                    <option value="4" selected>4 Jugadores</option>
+                    <option value="5">5 Jugadores</option>
+                    <option value="6">6 Jugadores</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="use-characters" aria-label="Usar personajes">
+                    <span class="checkbox-label">🧙‍♂️ Usar personajes especiales</span>
+                </label>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="use-boss-mode" aria-label="Activar modo Jefe">
+                    <span class="checkbox-label">💀 Activar modo Jefe</span>
+                </label>
+            </div>
+            <button id="next-setup" class="btn-primary" aria-label="Continuar">Continuar</button>
+        </div>
+        
+        <!-- Inputs uno por uno para cada jugador -->
+        <div id="player-step" class="hidden setup-form">
+            <h3 id="player-step-title" style="margin-bottom: 1.5rem;">Jugador 1</h3>
+            <div class="form-group">
+                <label for="player-name" class="form-label">Nombre del jugador:</label>
+                <input type="text" id="player-name" class="input-medieval" aria-label="Nombre del jugador" />
+            </div>
+            <div class="form-group" id="character-select-group" style="display:none;">
+                <label for="player-character" class="form-label">Personaje:</label>
+                <select id="player-character" class="input-medieval" aria-label="Personaje">
+                    <option value="">Seleccionar personaje...</option>
+                    <option value="warrior">Guerrero</option>
+                    <option value="cleric">Clérigo</option>
+                    <option value="thief">Ladrón</option>
+                    <option value="wizard">Hechicero</option>
+                    <option value="ranger">Explorador</option>
+                </select>
+            </div>
+            <button id="next-player" class="btn-primary" aria-label="Siguiente jugador">Siguiente</button>
+        </div>
+        
+        <!-- Resumen final antes de iniciar -->
+        <div id="player-summary" class="hidden setup-form">
+            <h3>Resumen de jugadores</h3>
+            <ul id="summary-list" style="list-style: none; padding: 0; margin: 1.5rem 0;"></ul>
+            <div id="boss-setup-fields" class="hidden">
+                <h3 style="margin-top: 2rem;">Configuración del Jefe</h3>
+                <div class="form-group">
+                    <label for="boss-name" class="form-label">Nombre del Jefe:</label>
+                    <input type="text" id="boss-name" class="input-medieval" value="Rey Esqueleto" aria-label="Nombre del jefe" />
+                </div>
+                <div class="form-group">
+                    <label for="boss-life" class="form-label">Vida Inicial del Jefe:</label>
+                    <input type="number" id="boss-life" class="input-medieval" value="300" min="1" aria-label="Vida inicial del jefe" />
+                </div>
+            </div>
+            <button id="start-button" class="btn-primary" aria-label="Iniciar Juego">
+                🎮 Iniciar Partida
+            </button>
+        </div>
+    </section>
+
+    <!-- Pantalla de juego -->
+    <section id="game-screen" class="fade-in hidden" role="region" aria-label="Pantalla de juego">
+        <h1 class="game-title">⚔️ The Tiny Realms ⚔️</h1>
+        <h2 class="game-subtitle" id="game-mode-title"></h2>
+        
+        <div class="battle-container">
+            <!-- Contenedor de jugadores izquierdos (2) -->
+            <div id="players-container-left" class="player-card-group-left"></div>
+
+            <!-- Carta Central (Jefe o Info) -->
+            <div id="central-card-wrapper">
+                <!-- Contenido dinámico del jefe o info -->
+            </div>
+
+            <!-- Contenedor de jugadores derechos (2) -->
+            <div id="players-container-right" class="player-card-group-right"></div>
+        </div>
+        
+        <!-- BARRA DE FOOTER ANCLADA (NUEVA) -->
+        <div id="game-footer" class="game-footer-bar hidden">
+            <div class="footer-btn-group">
+                <button id="history-btn" class="footer-btn" aria-label="Historial de Acciones">
+                    📜 Historial
+                </button>
+                <button id="settings-btn" class="footer-btn" aria-label="Ajustes">
+                    ⚙️ Settings
+                </button>
+            </div>
+            
+            <!-- Botón de Reinicio que llama al modal -->
+            <button id="reset-button" class="btn-primary" aria-label="Reiniciar Juego">
+                🔄 Reiniciar Partida
+            </button>
+        </div>
+    </section>
+
+    <script>
+        // CONFIGURACIÓN Y CONSTANTES
+        const CONFIG = {
+            ICON_PATH: "", 
+            AVATAR_PATH: "", 
+            SOUND_PATH: "",
+            MAX_LIFE: 9999, 
+            COUNTER_TIMEOUT: 1500 // 1.5 segundos para la animación flotante
+        };
+        
+        // Data de Personajes y Avatares (Simplificado/Emoji)
+        const CHARACTERS = {
+            warrior: { name: "Guerrero", vida: 60, color: "warrior", icon: "🛡️" },
+            cleric: { name: "Clérigo", vida: 55, color: "cleric", icon: "✨" },
+            thief: { name: "Ladrón", vida: 52, color: "thief", icon: "🗡️" },
+            wizard: { name: "Hechicero", vida: 50, color: "wizard", icon: "🔮" },
+            ranger: { name: "Explorador", vida: 58, color: "ranger", icon: "🏹" }
+        };
+
+        const GENDER_NAMES = {
+            warrior: { m: "Guerrero", f: "Guerrera" },
+            cleric: { m: "Clérigo", f: "Clériga" },
+            thief: { m: "Ladrón", f: "Ladrona" },
+            wizard: { m: "Hechicero", f: "Hechicera" },
+            ranger: { m: "Explorador", f: "Exploradora" }
+        };
+        
+        const GENERIC_AVATARS = ["👤", "🧑", "🧝‍♀️", "🧝‍♂️", "🧙‍♀️", "🧙‍♂️", "👹", "🤖"];
+
+        // ESTADO GLOBAL
+        class GameState {
+            constructor() {
+                this.players = [];
+                this.boss = null;
+                this.isBossMode = false;
+                this.counters = {};
+                this.timers = {};
+                this.directions = {};
+                this.sounds = this.initializeSounds();
+            }
+
+            initializeSounds() {
+                // En esta versión unificada, usamos Tone.js para efectos mínimos
+                try {
+                    // Cargar Tone.js si no está cargado (asume que está en CDN)
+                    if (typeof Tone === 'undefined') {
+                        console.warn("Tone.js no está cargado. Se omite la inicialización de sonido.");
+                        return { damage: null, heal: null };
+                    }
+                    
+                    const damageSynth = new Tone.MembraneSynth({
+                        pitchDecay: 0.05,
+                        octaves: 8,
+                        envelope: { attack: 0.001, decay: 0.4, sustain: 0.0, release: 0.05 }
+                    }).toDestination();
+                    
+                    const healSynth = new Tone.Synth({
+                        oscillator: { type: "sine" },
+                        envelope: { attack: 0.005, decay: 0.2, sustain: 0.1, release: 0.5 }
+                    }).toDestination();
+                    
+                    return {
+                        damage: () => damageSynth.triggerAttackRelease("C2", "8n"),
+                        heal: () => healSynth.triggerAttackRelease("G4", "8n")
+                    };
+                } catch (error) {
+                    console.warn('Error inicializando sonidos (Tone.js):', error);
+                    return { damage: null, heal: null };
+                }
+            }
+
+            playSound(type) {
+                if (this.sounds[type]) {
+                    this.sounds[type]();
+                }
+            }
+
+            resetCounters() {
+                Object.keys(this.counters).forEach(id => {
+                    const counterEl = document.getElementById(`counter-player${id}`) || document.getElementById(`counter-boss`);
+                    if (counterEl) {
+                        counterEl.classList.remove("animate");
+                        counterEl.textContent = "";
+                    }
+                    this.counters[id] = 0;
+                    this.directions[id] = null;
+                    clearTimeout(this.timers[id]);
+                });
+            }
+        }
+        
+        // Cargar Tone.js (asume que no está cargado)
+        const loadToneJs = () => {
+            return new Promise((resolve) => {
+                if (typeof Tone !== 'undefined') {
+                    resolve();
+                    return;
+                }
+                const script = document.createElement('script');
+                script.src = "https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js";
+                script.onload = resolve;
+                script.onerror = () => {
+                    console.error("No se pudo cargar Tone.js");
+                    resolve();
+                };
+                document.head.appendChild(script);
+            });
+        };
+
+        const gameState = new GameState();
+
+        // ELEMENTOS DEL DOM
+        const elements = {
+            // Setup
+            playerCountSelect: document.getElementById("player-count"),
+            useCharactersCheckbox: document.getElementById("use-characters"),
+            useBossModeCheckbox: document.getElementById("use-boss-mode"),
+            nextSetupBtn: document.getElementById('next-setup'),
+            setupInitial: document.getElementById('setup-initial'),
+            playerStep: document.getElementById('player-step'),
+            playerStepTitle: document.getElementById('player-step-title'),
+            playerNameInput: document.getElementById('player-name'),
+            characterSelectGroup: document.getElementById('character-select-group'),
+            playerCharacterSelect: document.getElementById('player-character'),
+            nextPlayerBtn: document.getElementById('next-player'),
+            playerSummary: document.getElementById('player-summary'),
+            summaryList: document.getElementById('summary-list'),
+            bossSetupFields: document.getElementById('boss-setup-fields'),
+            bossNameInput: document.getElementById('boss-name'),
+            bossLifeInput: document.getElementById('boss-life'),
+            startButton: document.getElementById("start-button"),
+
+            // Game
+            resetButton: document.getElementById("reset-button"),
+            setupScreen: document.getElementById("setup-screen"),
+            gameScreen: document.getElementById("game-screen"),
+            playersContainerLeft: document.getElementById("players-container-left"),
+            playersContainerRight: document.getElementById("players-container-right"),
+            centralCardWrapper: document.getElementById("central-card-wrapper"),
+            gameModeTitle: document.getElementById("game-mode-title"),
+            gameFooter: document.getElementById("game-footer"), // NUEVO
+            
+            // Modal
+            modalOverlay: document.getElementById('custom-modal-overlay'),
+            modalTitle: document.getElementById('modal-title'),
+            modalMessage: document.getElementById('modal-message'),
+            modalButtons: document.getElementById('modal-buttons'),
+            modalIcon: document.getElementById('modal-icon')
+        };
+        
+        // MODAL DE CONFIRMACIÓN / ALERTA
+        const showModal = (title, message, icon, buttons, callback) => {
+            elements.modalTitle.textContent = title;
+            elements.modalMessage.textContent = message;
+            elements.modalIcon.textContent = icon;
+            elements.modalButtons.innerHTML = '';
+            
+            buttons.forEach(btn => {
+                const buttonEl = document.createElement('button');
+                // Usar btn.class para determinar si es primary o secondary
+                buttonEl.classList.add(btn.class || 'btn-primary');
+                buttonEl.textContent = btn.text;
+                buttonEl.addEventListener('click', () => {
+                    elements.modalOverlay.classList.remove('visible');
+                    if (callback) callback(btn.value);
+                });
+                elements.modalButtons.appendChild(buttonEl);
+            });
+
+            elements.modalOverlay.classList.add('visible');
+        };
+
+        // UTILIDADES
+        const utils = {
+            shuffleArray: (array) => {
+                const shuffled = [...array];
+                for (let i = shuffled.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+                }
+                return shuffled;
+            },
+
+            animate: (element, className, duration = 300) => {
+                element.classList.add(className);
+                setTimeout(() => element.classList.remove(className), duration);
+            },
+            
+            // Reemplazo de alert()
+            showAlert: (message) => {
+                showModal("Aviso", message, "⚠️", [{ text: "Aceptar", value: true }]);
+            }
+        };
+
+        // GESTIÓN DE CONTADORES VISUALES
+        class CounterManager {
+            static updateClickCounter(id, delta, isBoss = false) {
+                const counterId = isBoss ? "boss" : `player${id}`;
+                const counterEl = document.getElementById(`counter-${counterId}`);
+                if (!counterEl) return;
+
+                const newDirection = delta > 0 ? "up" : "down";
+
+                // Reset counter si cambia de dirección
+                if (gameState.directions[counterId] && gameState.directions[counterId] !== newDirection) {
+                    gameState.counters[counterId] = 0;
+                    clearTimeout(gameState.timers[counterId]);
+                }
+
+                gameState.directions[counterId] = newDirection;
+                gameState.counters[counterId] = (gameState.counters[counterId] || 0) + Math.abs(delta); // Usa valor absoluto
+                
+                // Si es daño al jefe, mostrar en rojo; si es curación al jefe o jugador, mostrar en verde
+                const isDamage = delta < 0;
+                const prefix = isDamage ? "-" : "+";
+                counterEl.textContent = prefix + gameState.counters[counterId];
+                counterEl.style.color = isDamage ? "#ff4444" : "#32cd32";
+
+                // Animar contador
+                counterEl.classList.remove("animate");
+                void counterEl.offsetWidth; // Trigger reflow
+                counterEl.classList.add("animate");
+
+                // Auto-hide counter
+                clearTimeout(gameState.timers[counterId]);
+                gameState.timers[counterId] = setTimeout(() => {
+                    counterEl.classList.remove("animate");
+                    gameState.counters[counterId] = 0;
+                    gameState.directions[counterId] = null;
+                }, CONFIG.COUNTER_TIMEOUT);
+            }
+        }
+        
+        // GESTIÓN DE JEFES
+        class BossManager {
+            static renderBossCard() {
+                const boss = gameState.boss;
+                if (!boss) {
+                    elements.centralCardWrapper.innerHTML = BossManager.createInfoCard().outerHTML;
+                    elements.gameModeTitle.textContent = "Batalla en el Reino";
+                    return;
+                }
+
+                elements.centralCardWrapper.innerHTML = BossManager.createBossCard(boss).outerHTML;
+                elements.gameModeTitle.textContent = "⚔️ Batalla de Jefe ⚔️";
+
+                // Re-attach listeners for the new boss buttons
+                document.getElementById('boss-damage-btn').addEventListener('click', () => {
+                    BossManager.handleLifeChange(-1, document.getElementById('boss-damage-btn'));
+                });
+                document.getElementById('boss-heal-btn').addEventListener('click', () => {
+                    BossManager.handleLifeChange(1, document.getElementById('boss-heal-btn'));
+                });
+            }
+            
+            static createInfoCard() {
+                const card = document.createElement("div");
+                card.classList.add("info-card", "fade-in");
+                
+                // Botón "Nueva Configuración" movido al Footer
+                card.innerHTML = `
+                    <h3>Modo Campaña</h3>
+                    <p>¡Reúne a tus héroes para la aventura!</p>
+                    <p>Estadísticas del Juego (No implementado aún):</p>
+                    <p>Turno: I</p>
+                    <p>Oro de Campaña: 500</p>
+                    <p>Objetivo: ¡Consulta el Footer para Reiniciar o Cambiar Configuración!</p>
+                `;
+                return card;
+            }
+
+            static createBossCard(boss) {
+                const card = document.createElement("div");
+                card.classList.add("central-card", "fade-in");
+                card.id = `card-boss`;
+                
+                card.innerHTML = `
+                    <div class="boss-header">BOSS</div>
+                    <div class="boss-avatar" style="background-image: url('https://placehold.co/150x150/000000/8b0000?text=💀')"></div>
+                    <div class="boss-name">${boss.name}</div>
+                    
+                    <div class="boss-life-control">
+                        <button id="boss-damage-btn" class="boss-life-btn" aria-label="Dañar Jefe">-</button>
+                        <div class="boss-life-display" id="life-boss">${boss.vida}</div>
+                        <button id="boss-heal-btn" class="boss-life-btn" aria-label="Curar Jefe">+</button>
+                    </div>
+
+                    <div id="counter-boss" class="click-counter"></div>
+                    <!-- Eliminada la etiqueta <p> de Vida Máxima -->
+                `;
+                return card;
+            }
+
+            static handleLifeChange(delta, button) {
+                const boss = gameState.boss;
+                if (!boss) return;
+
+                const newVida = Math.max(0, Math.min(boss.vida + delta, boss.maxVida));
+                boss.vida = newVida;
+                
+                // Efectos de sonido (daño si delta < 0, curación si delta > 0)
+                gameState.playSound(delta < 0 ? 'damage' : 'heal');
+
+                // Actualizar visuales
+                BossManager.updateCardVisuals(boss);
+
+                // Actualizar contador visual
+                CounterManager.updateClickCounter('boss', delta, true);
+
+                // Animar botón
+                utils.animate(button, "btn-animate", 400);
+
+                if (boss.vida <= 0) {
+                    BossManager.handleBossDefeat();
+                }
+            }
+
+            static updateCardVisuals(boss) {
+                const vidaEl = document.getElementById('life-boss');
+                const cardEl = document.getElementById('central-card-wrapper').querySelector('.central-card');
+
+                if (vidaEl) {
+                    vidaEl.textContent = boss.vida;
+                    
+                    const ratio = boss.vida / boss.maxVida;
+                    if (ratio <= 0.25 && boss.vida > 0) {
+                        cardEl.style.boxShadow = `0 0 40px var(--boss-glow), inset 0 0 30px rgba(255, 0, 0, 0.7)`;
+                        cardEl.style.borderColor = "#ff0000";
+                    } else if (ratio <= 0) {
+                         cardEl.style.boxShadow = `0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 0, 0, 0.7)`;
+                         cardEl.style.filter = "grayscale(100%)";
+                    } else {
+                        cardEl.style.boxShadow = `0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5)`;
+                        cardEl.style.borderColor = "var(--boss-border)";
+                        cardEl.style.filter = "none";
+                    }
+                }
+            }
+            
+            static handleBossDefeat() {
+                const bossCard = document.getElementById(`card-boss`);
+                if (bossCard) {
+                    utils.animate(bossCard, "defeat-flash", 1000);
+                    showModal("VICTORIA", "¡Has derrotado al Jefe! ¡Felicidades!", "🎉", [{ text: "Reiniciar Partida", value: true }], (res) => {
+                        if (res) EventManager.handleGameReset();
+                    });
+                }
+            }
+        }
+
+
+        // GESTIÓN DE TARJETAS DE JUGADOR (Ajustado a Layout Horizontal)
+        class CardManager {
+            static renderPlayerCards() {
+                elements.playersContainerLeft.innerHTML = "";
+                elements.playersContainerRight.innerHTML = "";
+                
+                const maxPlayers = gameState.players.length;
+                const splitIndex = Math.ceil(maxPlayers / 2);
+
+                gameState.players.forEach((player, index) => {
+                    const card = this.createPlayerCard(player);
+                    card.style.animationDelay = `${index * 0.15}s`;
+                    
+                    if (index < splitIndex) {
+                        elements.playersContainerLeft.appendChild(card);
+                    } else {
+                        elements.playersContainerRight.appendChild(card);
+                    }
+                });
+            }
+
+            static createPlayerCard(player) {
+                const card = document.createElement("div");
+                card.classList.add("player-card", "fade-in");
+                card.id = `card-${player.id}`;
+
+                if (player.character) {
+                    card.classList.add(CHARACTERS[player.character].color);
+                }
+
+                // Estructura interna horizontal con 3 áreas: Info | Vida | Acciones
+                card.innerHTML = `
+                    <div class="player-info-side">
+                        <div class="player-name">${player.name}</div>
+                        <div class="avatar-icon" id="avatar-${player.id}">${player.avatar || '👤'}</div>
+                        <div class="character-name" id="char-name-${player.id}">${player.characterName}</div>
+                    </div>
+                    <div class="player-life-center">
+                        <!-- Contador de vida grande, centrado en su columna -->
+                        <p class="life-display" id="life-${player.id}">${player.vida}</p>
+                    </div>
+                    <div class="player-action-side">
+                        <button id="btn-heal-${player.id}" class="action-btn" aria-label="Curar (+1)">
+                            +
+                        </button>
+                        <span class="heart-icon-small" id="heart-small-${player.id}">❤️</span>
+                        <button id="btn-damage-${player.id}" class="action-btn" aria-label="Dañar (-1)">
+                            -
+                        </button>
+                    </div>
+                    <div id="counter-player${player.id}" class="click-counter"></div>
+                `;
+                
+                // Re-attach listeners for the new buttons
+                const btnHeal = card.querySelector(`#btn-heal-${player.id}`);
+                const btnDamage = card.querySelector(`#btn-damage-${player.id}`);
+                
+                btnHeal.classList.add("btn-heal");
+                btnDamage.classList.add("btn-damage");
+                
+                btnHeal.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    this.handleLifeChange(player.id, 1, btnHeal);
+                });
+                
+                btnDamage.addEventListener("click", (e) => {
+                    e.preventDefault();
+                    this.handleLifeChange(player.id, -1, btnDamage);
+                });
+
+                this.updateCardVisuals(player);
+                return card;
+            }
+
+            // Mantenemos la lógica de vida, pero ajustamos para no usar CONFIG.MAX_LIFE
+            static handleLifeChange(playerId, delta, button) {
+                const player = gameState.players.find(p => p.id === playerId);
+                if (!player) return;
+
+                // La vida máxima es siempre el valor de vida inicial del personaje (player.maxVida)
+                const newVida = Math.max(0, player.vida + delta); 
+                player.vida = newVida;
+
+                gameState.playSound(delta > 0 ? 'heal' : 'damage');
+                this.updateCardVisuals(player);
+                CounterManager.updateClickCounter(playerId, delta);
+                utils.animate(button, "btn-animate", 400);
+
+                if (player.vida <= 0) {
+                    this.handlePlayerDefeat(playerId);
+                }
+            }
+
+            static updateCardVisuals(player) {
+                const vidaEl = document.getElementById(`life-${player.id}`);
+                const heartSmallEl = document.getElementById(`heart-small-${player.id}`);
+                const cardEl = document.getElementById(`card-${player.id}`);
+
+                if (vidaEl) {
+                    vidaEl.textContent = player.vida;
+                    if (player.vida <= 10 && player.vida > 0) {
+                        vidaEl.classList.add("critical-health");
+                    } else {
+                        vidaEl.classList.remove("critical-health");
+                    }
+                }
+                
+                // Efecto de transparencia en jugador derrotado
+                if (cardEl) {
+                    if (player.vida <= 0) {
+                        cardEl.style.opacity = "0.6";
+                        cardEl.style.filter = "grayscale(70%)";
+                    } else {
+                        cardEl.style.opacity = "1";
+                        cardEl.style.filter = "none";
+                    }
+                }
+                
+                // Lógica de opacidad dinámica para el corazón pequeño
+                if (heartSmallEl) {
+                    // La vida inicial más baja es 50 (Hechicero)
+                    const opacityRatio = player.vida * 2 / 100; // Si la vida es 50, el ratio es 1.0
+                    const finalOpacity = Math.min(1, Math.max(0.2, opacityRatio)); // Mínimo 0.2, Máximo 1.0
+                    
+                    heartSmallEl.style.opacity = finalOpacity;
+                    
+                    // Si el jugador está derrotado, forzar opacidad a 0
+                    if (player.vida <= 0) {
+                        heartSmallEl.style.opacity = 0;
+                    }
+                }
+            }
+
+            static handlePlayerDefeat(playerId) {
+                const card = document.getElementById(`card-${playerId}`);
+                if (card) {
+                    utils.animate(card, "defeat-flash", 800);
+                }
+                
+                // Opcional: Revisar si todos los jugadores están muertos
+                const activePlayers = gameState.players.filter(p => p.vida > 0);
+                if (activePlayers.length === 0) {
+                    showModal("DERROTA", "¡Todos los héroes han caído!", "💀", [{ text: "Reiniciar Partida", value: true }], (res) => {
+                        if (res) EventManager.handleGameReset();
+                    });
+                }
+            }
+        }
+
+        // GESTIÓN DE EVENTOS Y FLUJO DE PANTALLAS
+        class EventManager {
+            static init() {
+                loadToneJs().then(() => {
+                    gameState.sounds = gameState.initializeSounds();
+                    console.log("Tone.js cargado e inicializado.");
+                });
+                
+                // Setup flow listeners
+                elements.nextSetupBtn.addEventListener('click', EventManager.handleNextSetup);
+                elements.nextPlayerBtn.addEventListener('click', EventManager.handleNextPlayer);
+                elements.startButton.addEventListener('click', EventManager.handleGameStart);
+                
+                // Game reset listener
+                elements.resetButton.addEventListener("click", () => {
+                    showModal(
+                        "Confirmación", 
+                        "¿Estás seguro de que quieres reiniciar la partida actual y volver a la configuración?", 
+                        "🔄", 
+                        [{ text: "Cancelar", value: false, class: "btn-secondary" }, { text: "Reiniciar", value: true, class: "btn-primary" }], 
+                        (confirm) => {
+                            if (confirm) EventManager.handleGameReset();
+                        }
+                    );
+                });
+                
+                // Placeholder buttons listeners (for future use)
+                document.getElementById('history-btn').addEventListener('click', () => utils.showAlert("La funcionalidad de Historial será implementada pronto."));
+                document.getElementById('settings-btn').addEventListener('click', () => utils.showAlert("La funcionalidad de Settings será implementada pronto."));
+
+
+                // Toggle visibility of character/boss fields
+                elements.useCharactersCheckbox.addEventListener('change', EventManager.toggleCharacterFields);
+                elements.useBossModeCheckbox.addEventListener('change', EventManager.toggleBossFields);
+
+                // Initial setup display
+                EventManager.toggleCharacterFields();
+                EventManager.toggleBossFields();
+            }
+            
+            static toggleCharacterFields() {
+                // Not needed here as PlayerManager.updatePlayerStep handles it
+            }
+            
+            static toggleBossFields() {
+                 if (EventManager.currentPlayer === EventManager.totalPlayers + 1) { // Only show/hide on summary screen
+                    elements.bossSetupFields.classList.toggle('hidden', !elements.useBossModeCheckbox.checked);
+                 }
+            }
+            
+            // Variables para el flujo
+            static totalPlayers = 4;
+            static useCharacters = false;
+            static useBossMode = false;
+            static currentPlayer = 1;
+            static playersData = [];
+            
+            static handleNextSetup() {
+                EventManager.totalPlayers = parseInt(elements.playerCountSelect.value, 10);
+                EventManager.useCharacters = elements.useCharactersCheckbox.checked;
+                EventManager.useBossMode = elements.useBossModeCheckbox.checked;
+                
+                elements.setupInitial.classList.add('hidden');
+                elements.playerStep.classList.remove('hidden');
+                EventManager.currentPlayer = 1;
+                EventManager.playersData = [];
+                EventManager.updatePlayerStep();
+            }
+
+            static updatePlayerStep() {
+                elements.playerStepTitle.textContent = `Jugador ${EventManager.currentPlayer} de ${EventManager.totalPlayers}`;
+                elements.playerNameInput.value = '';
+                if (EventManager.useCharacters) {
+                    elements.characterSelectGroup.style.display = '';
+                    elements.playerCharacterSelect.value = '';
+                } else {
+                    elements.characterSelectGroup.style.display = 'none';
+                }
+            }
+
+            static handleNextPlayer() {
+                const name = elements.playerNameInput.value.trim();
+                if (!name) {
+                    utils.showAlert('Por favor ingresa un nombre para el jugador.');
+                    return;
+                }
+                let character = '';
+                if (EventManager.useCharacters) {
+                    character = elements.playerCharacterSelect.value;
+                    if (!character) {
+                        utils.showAlert('Selecciona un personaje.');
+                        return;
+                    }
+                }
+                
+                EventManager.playersData.push({ name, character });
+                
+                if (EventManager.currentPlayer < EventManager.totalPlayers) {
+                    EventManager.currentPlayer++;
+                    EventManager.updatePlayerStep();
+                } else {
+                    elements.playerStep.classList.add('hidden');
+                    EventManager.showSummary();
+                }
+            }
+
+            static showSummary() {
+                elements.summaryList.innerHTML = '';
+                EventManager.playersData.forEach((p, idx) => {
+                    const li = document.createElement('li');
+                    li.textContent = EventManager.useCharacters
+                        ? `Jugador ${idx + 1}: ${p.name} (${CHARACTERS[p.character].name})`
+                        : `Jugador ${idx + 1}: ${p.name} (Aventurero)`;
+                    elements.summaryList.appendChild(li);
+                });
+
+                if (EventManager.useBossMode) {
+                    elements.bossSetupFields.classList.remove('hidden');
+                } else {
+                    elements.bossSetupFields.classList.add('hidden');
+                }
+
+                elements.playerSummary.classList.remove('hidden');
+            }
+
+            static handleGameStart() {
+                // 1. Validar configuración de jefe si aplica
+                if (EventManager.useBossMode) {
+                    const bossName = elements.bossNameInput.value.trim();
+                    const bossLife = parseInt(elements.bossLifeInput.value, 10);
+                    if (!bossName) { utils.showAlert('Ingresa un nombre para el Jefe.'); return; }
+                    if (bossLife <= 0 || isNaN(bossLife)) { utils.showAlert('La vida inicial del Jefe debe ser un número positivo.'); return; }
+                    
+                    gameState.boss = { name: bossName, vida: bossLife, maxVida: bossLife };
+                    gameState.isBossMode = true;
+                } else {
+                    gameState.boss = null;
+                    gameState.isBossMode = false;
+                }
+
+                // 2. Crear datos de jugadores
+                const genericAvatars = utils.shuffleArray(GENERIC_AVATARS);
+                gameState.players = EventManager.playersData.map((p, idx) => {
+                    let vida = 50, avatar = genericAvatars[idx % genericAvatars.length], maxVida = 50, characterName = "Aventurero";
+                    if (EventManager.useCharacters && CHARACTERS[p.character]) {
+                        vida = CHARACTERS[p.character].vida;
+                        avatar = CHARACTERS[p.character].icon; // Usar el emoji del personaje
+                        maxVida = CHARACTERS[p.character].vida;
+                        characterName = CHARACTERS[p.character].name;
+                    }
+                    return {
+                        id: idx + 1,
+                        name: p.name,
+                        character: p.character,
+                        vida,
+                        avatar,
+                        maxVida,
+                        characterName
+                    };
+                });
+                
+                // 3. Renderizar y hacer la transición
+                elements.setupScreen.classList.add("hidden");
+                elements.gameScreen.classList.remove("hidden");
+                
+                BossManager.renderBossCard();
+                CardManager.renderPlayerCards();
+                gameState.resetCounters();
+                
+                // Mostrar footer al iniciar la partida
+                elements.gameFooter.classList.remove('hidden');
+            }
+
+            static handleGameReset() {
+                // Transición de pantallas
+                elements.gameScreen.classList.add("hidden");
+                elements.setupScreen.classList.remove("hidden");
+
+                // Ocultar footer
+                elements.gameFooter.classList.add('hidden');
+
+                // Limpiar estado
+                elements.playersContainerLeft.innerHTML = "";
+                elements.playersContainerRight.innerHTML = "";
+                elements.centralCardWrapper.innerHTML = "";
+                
+                gameState.players = [];
+                gameState.boss = null;
+                gameState.isBossMode = false;
+                gameState.resetCounters();
+
+                // Volver al paso inicial del flujo
+                elements.setupInitial.classList.remove('hidden');
+                elements.playerStep.classList.add('hidden');
+                elements.playerSummary.classList.add('hidden');
+
+                // Resetear variables de flujo
+                EventManager.totalPlayers = 4;
+                EventManager.useCharacters = false;
+                EventManager.useBossMode = false;
+                EventManager.currentPlayer = 1;
+                EventManager.playersData = [];
+                
+                // Resetear selects y checkboxes a valores por defecto
+                elements.playerCountSelect.value = "4";
+                elements.useCharactersCheckbox.checked = false;
+                elements.useBossModeCheckbox.checked = false;
+            }
+        }
+
+        // INICIALIZACIÓN DE LA APLICACIÓN
+        document.addEventListener("DOMContentLoaded", () => {
+            console.log("🎮 The Tiny Realms - Inicializando...");
+            EventManager.init();
+            console.log("✅ Aplicación lista.");
+        });
+    </script>
+    <!-- Incluir Tone.js para efectos de sonido -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+</body>
+</html>

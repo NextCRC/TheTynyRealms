@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>The Tiny Realms - Contador de Jefe</title>
+
+    <!-- Fuentes medievales -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=MedievalSharp&display=swap" rel="stylesheet" />
+    
+    <!-- Librería de Sonido (Tone.js) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+
+    <!-- Estilos personalizados -->
+    <link rel="stylesheet" href="css/styles.css" />
+</head>
+
+<body>
+    <!-- Pantalla de configuración (Setup Screen) -->
+    <section id="setup-screen" class="screen-container fade-in" role="region" aria-label="Configuración del juego">
+        <h1 class="game-title">⚔️ The Tiny Realms ⚔️</h1>
+        
+        <!-- Paso 1: Selección inicial de jugadores/modo -->
+        <div id="setup-initial" class="setup-form">
+            <div class="form-group">
+                <label for="player-count" class="form-label">Cantidad de jugadores:</label>
+                <select id="player-count" class="input-medieval" aria-label="Cantidad de jugadores">
+                    <option value="2">2 Jugadores</option>
+                    <option value="3">3 Jugadores</option>
+                    <option value="4" selected>4 Jugadores</option>
+                    <option value="5">5 Jugadores</option>
+                    <option value="6">6 Jugadores</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="use-characters" aria-label="Usar personajes">
+                    <span class="checkbox-label">🧙‍♂️ Usar personajes especiales</span>
+                </label>
+            </div>
+             <div class="form-group">
+                <label class="checkbox-container">
+                    <input type="checkbox" id="use-boss-mode" aria-label="Modo Boss">
+                    <span class="checkbox-label">💀 Modo Jefe</span>
+                </label>
+            </div>
+            <button id="next-setup" class="btn-primary" aria-label="Continuar">Continuar</button>
+        </div>
+        
+        <!-- Paso 2: Inputs uno por uno para cada jugador -->
+        <div id="player-step" class="hidden setup-form">
+            <h3 id="player-step-title">Jugador 1</h3>
+            <div class="form-group">
+                <label for="player-name" class="form-label">Nombre del jugador:</label>
+                <input type="text" id="player-name" class="input-medieval" aria-label="Nombre del jugador" placeholder="Ej: Rey Arturo" />
+            </div>
+            <div class="form-group" id="character-select-group" style="display:none;">
+                <label for="player-character" class="form-label">Personaje:</label>
+                <select id="player-character" class="input-medieval" aria-label="Personaje">
+                    <option value="">Seleccionar personaje...</option>
+                    <option value="warrior">Guerrero</option>
+                    <option value="cleric">Clérigo</option>
+                    <option value="thief">Ladrón</option>
+                    <option value="wizard">Hechicero</option>
+                    <option value="ranger">Explorador</option>
+                </select>
+            </div>
+            <button id="next-player" class="btn-primary" aria-label="Siguiente jugador">Siguiente</button>
+        </div>
+        
+        <!-- Paso 3: Resumen final antes de iniciar -->
+        <div id="player-summary" class="hidden setup-form">
+            <h3>Resumen de la Partida</h3>
+            <ul id="summary-list" class="text-left">
+                <!-- Lista dinámica -->
+            </ul>
+            
+            <div id="boss-setup-fields" class="form-group hidden">
+                <h3 class="form-label">Configuración del Jefe:</h3>
+                <input type="text" id="boss-name" class="input-medieval" placeholder="Nombre del Jefe (Ej: Lich King)" aria-label="Nombre del Jefe"/>
+                <input type="number" id="boss-life" class="input-medieval" placeholder="Vida Inicial (Ej: 300)" aria-label="Vida Inicial del Jefe" value="100"/>
+            </div>
+            
+            <button id="start-button" class="btn-primary" aria-label="Iniciar Juego">
+                🎮 INICIAR BATALLA
+            </button>
+        </div>
+    </section>
+
+    <!-- Pantalla de juego (Game Screen) -->
+    <section id="game-screen" class="hidden" role="main" aria-label="Batalla en curso">
+        <h2 class="game-subtitle" id="game-mode-title" role="heading" aria-level="2">Batalla en el Reino</h2>
+        
+        <div class="battle-container">
+            <!-- Columna Izquierda: Jugadores 1, 2... -->
+            <div id="players-container-left" class="player-card-group-left">
+                <!-- Cartas de jugador (dinámico) -->
+            </div>
+            
+            <!-- Columna Central: Jefe o Diario de Batalla -->
+            <div id="central-card-wrapper">
+                <!-- Carta Central (dinámico: Boss Card o Info Card) -->
+            </div>
+            
+            <!-- Columna Derecha: Jugadores 3, 4... -->
+            <div id="players-container-right" class="player-card-group-right">
+                <!-- Cartas de jugador (dinámico) -->
+            </div>
+        </div>
+        
+        <!-- Footer Fijo de la Aplicación -->
+        <footer id="game-footer" class="game-footer-bar hidden" role="contentinfo">
+            <div class="footer-btn-group">
+                <button id="history-btn" class="footer-btn" aria-label="Historial de Partida">Historial</button>
+                <button id="settings-btn" class="footer-btn" aria-label="Configuración de Audio y Opciones">Settings</button>
+            </div>
+            <button id="reset-button" class="btn-primary" aria-label="Reiniciar Partida y Volver a Configuración">Reiniciar Partida</button>
+        </footer>
+    </section>
+    
+    <!-- Modal de Confirmación Personalizado -->
+    <div id="custom-modal-overlay" class="custom-modal-overlay">
+        <div class="custom-modal-content">
+            <p id="modal-icon" class="modal-alert-icon">❓</p>
+            <h3 id="modal-title">Título</h3>
+            <p id="modal-message">Mensaje de la alerta.</p>
+            <div id="modal-buttons" class="modal-buttons">
+                <!-- Botones inyectados por JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Script principal (debe estar al final) -->
+    <script src="js/main.js"></script>
+</body>
+</html>
