@@ -110,6 +110,9 @@
         
         <!-- Footer Fijo de la Aplicación -->
         <footer id="game-footer" class="game-footer-bar hidden" role="contentinfo">
+            <!-- ELEMENTO AÑADIDO: Contenedor para la alerta de estado/log del footer -->
+            <div id="footer-alert" class="footer-alert">Lista para cualquier desafío.</div> 
+            
             <div class="footer-btn-group">
                 <button id="history-btn" class="footer-btn" aria-label="Historial de Partida">Historial</button>
                 <button id="settings-btn" class="footer-btn" aria-label="Configuración de Audio y Opciones">Settings</button>
@@ -120,7 +123,8 @@
     
     <!-- Modal de Confirmación Personalizado -->
     <div id="custom-modal-overlay" class="custom-modal-overlay">
-        <div class="custom-modal-content">
+        <!-- Añadido aria-modal="true" para mejorar la accesibilidad de la ventana emergente -->
+        <div class="custom-modal-content" role="dialog" aria-modal="true">
             <p id="modal-icon" class="modal-alert-icon">❓</p>
             <h3 id="modal-title">Título</h3>
             <p id="modal-message">Mensaje de la alerta.</p>

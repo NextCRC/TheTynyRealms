@@ -9,6 +9,7 @@ const CONFIG = {
     MAX_LIFE: 9999, 
     COUNTER_TIMEOUT: 1500, // 1.5 segundos para la animación flotante
     CRITICAL_THRESHOLD: 10, // Umbral para la alerta roja intermitente
+    ALLIANCE_THRESHOLD_PERCENT: 0.8 // Umbral de vida para ser objetivo de Alianza
 };
 
 // Mapeo de Texto de Leyenda a Archivo de Audio (Basado en narracio-audio-textos.pdf)
@@ -18,8 +19,35 @@ const NARRATION_MAP = {
     "La batalla comienza. ¡Que las cartas decidan vuestro destino!": "narracionintro01.mp3",
     "Esperando el próximo movimiento.": "narracion02.mp3",
     "¡Todos los héroes han caído!": "narracion03.mp3",
-    "¡Felicitaciones, has ganado la Batalla!": "narracion04.mp3",
-    "¡El Jefe ha sido derrotado! ¡Felicidades!": "narracion05.mp3", // Se usa en modal de victoria
+    "¡Felicitaciones, has ganado la Batalla!": "narracion04.mp3", // Se mantiene por si se usa en el modal de victoria (Modo No-Jefe)
+    "¡El Jefe ha sido derrotado! ¡Felicidades!": "narracion05.mp3", // Se usa en modal de victoria (Modo Jefe)
+    
+    // CORRECCIÓN DE NOMBRES DE ARCHIVO FALTANTES EN EL MAPA ORIGINAL
+    "Fue solo un rasguño. Seguimos con vida.": "narracion16.mp3",
+    "Un roce sin importancia. Ignora la herida.": "narracion17.mp3",
+    "La defensa funcionó: solo daños menores.": "narracion18.mp3",
+    "El golpe resbaló. Apenas se siente.": "narracion19.mp3",
+    "Solo daño cosmético. Sigue fuerte.": "narracion20.mp3",
+    "Un simple moretón. El enemigo falló el golpe fatal.": "narracion21.mp3",
+    "El impacto no fue suficiente. Se sacude el polvo.": "narracion22.mp3",
+    "¡Qué suerte! Solo recibe una pequeña penalización.": "narracion23.mp3",
+    "Un ataque débil. Ni se inmuta.": "narracion24.mp3",
+    "Una pequeña herida, nada que lo detenga.": "narracion25.mp3", 
+    "Usa un vendaje y recupera puntos de vida.": "narracion26.mp3",
+    "Un soplo de aire fresco. Sana un poco de vida.": "narracion27.mp3",
+    "Curación menor. ¡Puntos de vuelta!": "narracion28.mp3",
+    "La luz toca y restaura puntos.": "narracion29.mp3",
+    "Sorbo de poción ligera.": "narracion30.mp3",
+    "Pequeño milagro. Puntos recuperados.": "narracion31.mp3",
+    "La voluntad cura: vida restaurada.": "narracion32.mp3",
+    "Un alivio momentáneo. Ha sanado un poco.": "narracion33.mp3",
+    "El clérigo bendice: puntos restaurados.": "narracion34.mp3",
+    "Una ayuda extra. Gana puntos.": "narracion35.mp3",
+    "¡Poción maestra! Bebe el elixir.": "narracion36.mp3",
+    "La magia curativa envuelve. ¡Vida devuelta!": "narracion37.mp3",
+    "¡Un milagro total! Asombrosa cantidad de vida recuperada.": "narracion38.mp3",
+    "El poder de la naturaleza sana y restaura.": "narracion39.mp3",
+    "¡Se siente renovado! Recibe una curación épica.": "narracion40.mp3",
 
     // DAÑO ALTO (>= 5)
     "¡Ataque voraz! ¡Daño significativo recibido!": "narracion06.mp3",
@@ -32,37 +60,6 @@ const NARRATION_MAP = {
     "El impacto ha sido brutal. ¡Se tambalea!": "narracion13.mp3",
     "El enemigo da en el blanco. ¡Gravemente herido!": "narracion14.mp3",
     "Daño crítico: la voluntad es la única armadura restante.": "narracion15.mp3",
-
-    // DAÑO BAJO (< 5)
-    "Fue solo un rasguño. Seguimos con vida.": "narracion16.mp3",
-    "Un roce sin importancia. Ignora la herida.": "narracion17.mp3",
-    "La defensa funcionó: solo daños menores.": "narracion18.mp3",
-    "El golpe resbaló. Apenas se siente.": "narrcion19.mp3",
-    "Solo daño cosmético. Sigue fuerte.": "narracion20.mp3",
-    "Un simple moretón. El enemigo falló el golpe fatal.": "narracion21.mp3",
-    "El impacto no fue suficiente. Se sacude el polvo.": "narracion22.mp3",
-    "¡Qué suerte! Solo recibe una pequeña penalización.": "narracion23.mp3",
-    "Un ataque débil. Ni se inmuta.": "narracion24.mp3",
-    "Una pequeña herida, nada que lo detenga.": "narracion25.mp3", 
-
-    // CURACIÓN BAJA (<= 4)
-    "Usa un vendaje y recupera puntos de vida.": "narracion26.mp3",
-    "Un soplo de aire fresco. Sana un poco de vida.": "narracion27.mp3",
-    "Curación menor. ¡Puntos de vuelta!": "narracion28.mp3",
-    "La luz toca y restaura puntos.": "narracion29.mp3",
-    "Sorbo de poción ligera.": "narracion30.mp3",
-    "Pequeño milagro. Puntos recuperados.": "narracion31.mp3",
-    "La voluntad cura: vida restaurada.": "narracion32.mp3",
-    "Un alivio momentáneo. Ha sanado un poco.": "narracion33.mp3",
-    "El clérigo bendice: puntos restaurados.": "narracion34.mp3",
-    "Una ayuda extra. Gana puntos.": "narracion35.mp3",
-
-    // CURACIÓN ALTA (> 4)
-    "¡Poción maestra! Bebe el elixir.": "narracion36.mp3",
-    "La magia curativa envuelve. ¡Vida devuelta!": "narracion37.mp3",
-    "¡Un milagro total! Asombrosa cantidad de vida recuperada.": "narracion38.mp3",
-    "El poder de la naturaleza sana y restaura.": "narracion39.mp3",
-    "¡Se siente renovado! Recibe una curación épica.": "narracion40.mp3",
 };
 
 // Data de Personajes y Avatares
@@ -112,8 +109,7 @@ const getRandomMessage = (array) => {
 
 // MENSAJES DINÁMICOS PARA LA CARTA CENTRAL (Info Card)
 const BATTLE_LOG_MESSAGES = {
-    // Leyendas (sin nombres de jugador, listas para ElevenLabs)
-    // NOTA: Los textos aquí deben coincidir exactamente con las claves de NARRATION_MAP
+    // Los arrays de DAÑO y CURACIÓN se mantienen para generar la NARRACIÓN de voz (si la vida del jugador cambia)
     DAMAGE_HIGH: [
         "¡Ataque voraz! ¡Daño significativo recibido!", "Un impacto crítico atraviesa la armadura. ¡Cuidado!", "¡Siente el aguijón de la batalla! Puntos vitales perdidos.", 
         "El enemigo acierta de lleno. ¡Golpe demoledor!", "El golpe resuena en el campo de batalla.", "La ofensiva enemiga es implacable.", "¡Un fuerte castigo! Necesita recuperarse.", 
@@ -134,12 +130,15 @@ const BATTLE_LOG_MESSAGES = {
         "El poder de la naturaleza sana y restaura.", "¡Se siente renovado! Recibe una curación épica."
     ],
     
-    // Frases cortas con nombre (solo visibles en el log de abajo)
-    CRITICAL_LOW: (name) => `${name} está mal de vida. ¿Lo van a perdonar?`,
-    ALLIANCE_TARGET: (name) => `Creo que es hora de una alianza contra ${name}.`,
+    // Frases cortas con nombre (solo visibles en el log de abajo - footer)
     DEFEAT: (name) => `¡${name} ha caído en batalla! Su alma pasa a mejor vida.`,
     INIT: "La batalla comienza. ¡Que las cartas decidan vuestro destino!", 
-    IDLE: "Esperando el próximo movimiento."
+    IDLE: "Esperando el próximo movimiento.",
+    
+    // Mensajes de Fin de Partida
+    DEFEAT_GAME_MESSAGE: "¡Todos los héroes han caído!", 
+    BOSS_VICTORY_MESSAGE: "¡El Jefe ha sido derrotado! ¡Felicidades!", 
+    NORMAL_VICTORY_MESSAGE: "¡Felicitaciones, has ganado la Batalla!", 
 };
 
 // ESTADO GLOBAL
@@ -203,7 +202,7 @@ class GameState {
                 console.warn(`Cannot play legend sound ${fileName}:`, error);
             }
         } else {
-            // console.warn(`No se encontró mapeo de audio para la leyenda: "${logMessage}"`);
+             console.warn(`[Audio Faltante] No se encontró mapeo de audio para la leyenda: "${logMessage}"`);
         }
     }
 
@@ -236,11 +235,12 @@ class GameState {
 
     // LÓGICA DE MÚSICA DE FONDO (OGG) - AHORA NO REPITE INMEDIATAMENTE
     initializeMusic() {
+        // CORRECCIÓN: Usamos un array de 17 (soundtrack01 a soundtrack17)
         const musicFiles = Array.from({ length: 17 }, (_, i) => `${CONFIG.SOUND_PATH}soundtrack${String(i + 1).padStart(2, '0')}.ogg`);
         
         const audio = new Audio();
         audio.volume = 0.3; 
-        audio.loop = false; 
+        audio.loop = false; // Queremos que termine y luego inicie la siguiente
         
         const playNextTrack = () => {
             if (musicFiles.length === 0) return;
@@ -262,19 +262,24 @@ class GameState {
             audio.src = nextTrack;
             
             audio.addEventListener('canplaythrough', () => {
+                // CORRECCIÓN: Llamamos a play directamente ya que el usuario ya interactuó
                 audio.play().then(() => {
                     console.log(`Música de fondo iniciada: ${nextTrack}`);
                 }).catch(e => {
-                    console.log('Música de fondo esperando interacción de usuario (promesa fallida):', e);
+                    console.warn('Música de fondo falló al iniciar:', e);
                 });
             }, { once: true });
+
+            // Cargar la fuente para que se active el evento 'canplaythrough'
+            audio.load();
         };
         
         audio.addEventListener('ended', playNextTrack);
         
         return {
             start: () => {
-                if (audio.paused) {
+                // Solo llama a playNextTrack si está pausado o si no tiene fuente
+                if (audio.paused || !audio.src) {
                     playNextTrack();
                 }
             },
@@ -343,7 +348,10 @@ const elements = {
     centralCardWrapper: document.getElementById('central-card-wrapper'), 
     gameModeTitle: document.getElementById('game-mode-title'), 
     gameFooter: document.getElementById('game-footer'), 
-    modalOverlay: document.getElementById('custom-modal-overlay') 
+    modalOverlay: document.getElementById('custom-modal-overlay'),
+    
+    // Obtener el nuevo elemento del footer
+    footerAlert: document.getElementById('footer-alert')
 };
 
 // Utilidades
@@ -426,9 +434,13 @@ class CounterManager {
 
         clearTimeout(gameState.timers[counterId]);
         gameState.timers[counterId] = setTimeout(() => {
-            if (!isBoss && gameState.counters[counterId] > 0) {
+            // Se mantiene la lógica de log para la narración de voz si es jugador
+            if (gameState.counters[counterId] > 0) {
                 const totalChange = gameState.counters[counterId];
                 const isDamage = gameState.directions[counterId] === "down";
+                
+                // Llamamos a updateBattleLog (que ahora solo maneja la voz, no el texto del centro)
+                // Usamos el ID para diferenciar si es un jugador real o el proxy del jefe.
                 CardManager.updateBattleLog(id, totalChange, isDamage);
             }
 
@@ -530,7 +542,8 @@ class CardManager {
         avatarImg.classList.add("flip-glow", "flipping");
 
         const filename = player.avatar;
-        const base = filename.slice(0, -5);
+        // Asumiendo que el nombre del archivo es 'base' + 'm.png' o 'base' + 'f.png'
+        const base = filename.slice(0, -5); 
         const currentGender = filename.endsWith("m.png") ? "m" : "f";
         const newGender = currentGender === "m" ? "f" : "m";
         const newSrc = `${CONFIG.AVATAR_PATH}${base}${newGender}.png`;
@@ -549,6 +562,11 @@ class CardManager {
                 if (charNameEl) {
                     charNameEl.textContent = GENDER_NAMES[player.character][newGender];
                 }
+            };
+            // Manejo de error por si el nuevo avatar no existe (ej: "exploradorf.png")
+            avatarImg.onerror = () => {
+                avatarImg.classList.remove("flip-glow", "flipping");
+                console.warn(`Error: No se encontró la imagen de avatar: ${newSrc}`);
             };
         }, 300);
     }
@@ -570,11 +588,10 @@ class CardManager {
         }
     }
     
-    static updateBattleLog(playerId, totalChange, isDamage) {
-        if (gameState.isBossMode) return; 
-
-        const player = gameState.players.find(p => p.id === playerId);
-        if (!player) return;
+    // Función para generar narración de voz (se usa si la vida del jugador o jefe cambia)
+    static updateBattleLog(id, totalChange, isDamage) {
+        // Solo se actualiza el log principal si el cambio es significativo (>= 1, ya que es la unidad mínima)
+        if (totalChange < 1) return;
 
         let message;
         
@@ -589,6 +606,7 @@ class CardManager {
                 : getRandomMessage(BATTLE_LOG_MESSAGES.HEAL_LOW);
         }
         
+        // Llama a BossManager.updateBattleLog, que maneja la reproducción de audio Y la actualización del texto central (si aplica).
         BossManager.updateBattleLog(message);
     }
 
@@ -598,8 +616,9 @@ class CardManager {
         const heartSmallEl = document.getElementById(`heart-small-${player.id}`);
         const cardEl = document.getElementById(`card-${player.id}`);
         const CRITICAL_THRESHOLD = CONFIG.CRITICAL_THRESHOLD;
-        const ALLIANCE_THRESHOLD_PERCENT = 0.8;
-
+        
+        // REMOVIDO: Lógica de Alianza (Jugador más fuerte)
+        
         if (vidaEl) {
             vidaEl.textContent = player.vida;
             
@@ -620,60 +639,37 @@ class CardManager {
             }
         }
         
-        // Lógica de Alianza (Jugador más fuerte) y Crítica (Jugador débil)
+        // Lógica de Derrota y Crítica
         if (cardEl) {
             if (player.vida <= 0) {
                 cardEl.style.opacity = "0.6";
                 cardEl.style.filter = "grayscale(70%)";
                 gameState.criticalPlayers.delete(player.id);
-                // Usar nombre en el Log del footer para la derrota
-                BossManager.updateBattleLogFooter(BATTLE_LOG_MESSAGES.DEFEAT(player.name), 'defeat');
-                // Reproducir audio de derrota total
-                gameState.playNarrationForLog(BATTLE_LOG_MESSAGES.DEFEAT_GAME); // Nueva llamada
+                
+                // Actualizar log del footer con la derrota del jugador
+                BossManager.updateFooterAlerts(BATTLE_LOG_MESSAGES.DEFEAT(player.name), 'defeat');
             } else {
                 cardEl.style.opacity = "1";
                 cardEl.style.filter = "none";
                 
+                // Actualizar set de jugadores críticos
                 if (player.vida <= CRITICAL_THRESHOLD) {
                     gameState.criticalPlayers.add(player.id);
                 } else {
                     gameState.criticalPlayers.delete(player.id);
                 }
-                
-                const alivePlayers = gameState.players.filter(p => p.vida > 0);
-                if (alivePlayers.length > 0) {
-                    const sortedPlayers = alivePlayers.sort((a, b) => b.vida - a.vida);
-                    const allianceCandidate = sortedPlayers[0];
-                    
-                    if (allianceCandidate && allianceCandidate.vida >= (allianceCandidate.maxVida * ALLIANCE_THRESHOLD_PERCENT)) {
-                         gameState.allianceTarget = allianceCandidate.id;
-                    } else {
-                         gameState.allianceTarget = null;
-                    }
-                } else {
-                    gameState.allianceTarget = null;
-                }
             }
         }
         
-        // Lógica de opacidad dinámica para el corazón pequeño
-        if (heartSmallEl) {
-            const opacityRatio = player.vida * 2 / 100;
-            const finalOpacity = Math.min(1, Math.max(0.2, opacityRatio)); 
-            
-            heartSmallEl.style.opacity = finalOpacity;
-            
-            if (player.vida <= 0) {
-                heartSmallEl.style.opacity = 0;
-            }
-        }
-        
-        // Forzar la actualización del log de batalla
+        // REMOVIDO: Recalculo de objetivo de alianza.
+        gameState.allianceTarget = null; // Reiniciar el target de alianza
+
+        // Forzar la actualización del log de batalla si no es modo jefe
         if (!gameState.isBossMode) {
              BossManager.renderBossCard(); 
         }
         
-        // Actualizar el log del footer con las alertas críticas/alianza
+        // Actualizar el log del footer (solo para alertas críticas si existen)
         BossManager.updateFooterAlerts();
     }
 
@@ -685,9 +681,11 @@ class CardManager {
         
         const activePlayers = gameState.players.filter(p => p.vida > 0);
         if (activePlayers.length === 0) {
+            const DEFEAT_MESSAGE = BATTLE_LOG_MESSAGES.DEFEAT_GAME_MESSAGE;
+            
             // Reproducir audio de derrota total (Game Over)
-            gameState.playNarrationForLog(BATTLE_LOG_MESSAGES.DEFEAT_GAME);
-            showModal("DERROTA", "¡Todos los héroes han caído!", "💀", [{ text: "Reiniciar Partida", value: true, class: "btn-primary" }], (res) => {
+            gameState.playNarrationForLog(DEFEAT_MESSAGE); 
+            showModal("DERROTA", DEFEAT_MESSAGE, "💀", [{ text: "Reiniciar Partida", value: true, class: "btn-primary" }], (res) => {
                 if (res) EventManager.handleGameReset();
             });
         }
@@ -699,68 +697,69 @@ class BossManager {
     static renderBossCard() {
         const boss = gameState.boss;
         if (!gameState.isBossMode) {
+            // Modo Info/Diario de Batalla
             elements.centralCardWrapper.innerHTML = BossManager.createInfoCard().outerHTML;
             elements.gameModeTitle.textContent = "Batalla en el Reino";
             return;
         }
 
+        // Modo Jefe
         elements.centralCardWrapper.innerHTML = BossManager.createBossCard(boss).outerHTML;
         elements.gameModeTitle.textContent = "⚔️ Batalla de Jefe ⚔️";
 
         document.getElementById('boss-damage-btn').addEventListener('click', () => {
-            BossManager.handleLifeChange(-1, document.getElementById('boss-damage-btn'));
+            // Se pasa -1 para daño
+            BossManager.handleLifeChange(-1, document.getElementById('boss-damage-btn')); 
         });
         document.getElementById('boss-heal-btn').addEventListener('click', () => {
+            // Se pasa +1 para curación
             BossManager.handleLifeChange(1, document.getElementById('boss-heal-btn'));
         });
+        
+        // Actualizar visualización del jefe al renderizar
+        BossManager.updateCardVisuals(boss);
     }
 
+    // Se mantiene updateBattleLog para la narración de voz de jugadores
     static updateBattleLog(message) {
         gameState.battleLog = message;
         // Reproducir audio de la leyenda
         gameState.playNarrationForLog(message);
-        BossManager.renderBossCard();
-    }
-
-    static updateBattleLogFooter(message, type) {
-        const footerAlert = document.getElementById('footer-alert');
-        if (footerAlert) {
-            footerAlert.textContent = message;
-            footerAlert.className = `footer-alert ${type}`;
+        
+        // CORRECCIÓN: Solo re-renderizamos la carta central si NO es modo Boss
+        if (!gameState.isBossMode) {
+             BossManager.renderBossCard(); 
         }
     }
-
-    static updateFooterAlerts() {
-        const footerAlert = document.getElementById('footer-alert');
+    
+    // Función central para actualizar las alertas del footer
+    static updateFooterAlerts(forcedMessage = null, forcedType = null) {
+        const footerAlert = elements.footerAlert;
         if (!footerAlert) return;
 
-        let alertMessage = "";
+        let alertMessage = BATTLE_LOG_MESSAGES.IDLE;
         let alertType = "";
 
-        // 1. Alertas Críticas (con nombres)
-        const criticalNames = Array.from(gameState.criticalPlayers).map(id => gameState.players.find(p => p.id === id)?.name).filter(Boolean);
-        if (criticalNames.length > 0) {
-            alertMessage = BATTLE_LOG_MESSAGES.CRITICAL_LOW(criticalNames.join(', '));
-            alertType = 'critical';
+        if (forcedMessage && forcedType) {
+             // Mensaje forzado (e.g., derrota de un jugador)
+             alertMessage = forcedMessage;
+             alertType = forcedType;
         }
-
-        // 2. Alerta de Alianza (con nombre)
-        if (gameState.allianceTarget && !alertMessage) {
-            const targetPlayer = gameState.players.find(p => p.id === gameState.allianceTarget);
-            if (targetPlayer && targetPlayer.vida > 0) {
-                 alertMessage = BATTLE_LOG_MESSAGES.ALLIANCE_TARGET(targetPlayer.name);
-                 alertType = 'alliance';
+        // 1. Alertas Críticas (MÁXIMA PRIORIDAD - SOLO ESTE SE MANTIENE)
+        else {
+            const criticalNames = Array.from(gameState.criticalPlayers)
+                .map(id => gameState.players.find(p => p.id === id)?.name)
+                .filter(Boolean);
+                
+            if (criticalNames.length > 0) {
+                // Mensaje simple de alerta crítica, sin hablar de alianzas
+                alertMessage = `¡CUIDADO! ${criticalNames.join(', ')} tiene vida crítica.`;
+                alertType = 'critical';
             }
         }
         
-        if (alertMessage) {
-            footerAlert.textContent = alertMessage;
-            footerAlert.className = `footer-alert ${alertType}`;
-        } else {
-            // Si no hay alertas, mostrar el mensaje por defecto del footer
-            footerAlert.textContent = "Lista para cualquier desafío.";
-            footerAlert.className = `footer-alert`;
-        }
+        footerAlert.textContent = alertMessage;
+        footerAlert.className = `footer-alert ${alertType}`;
     }
     
     static createInfoCard() {
@@ -768,11 +767,12 @@ class BossManager {
         card.classList.add("info-card", "fade-in");
         
         // 1. Log Principal (genérico, para ElevenLabs)
-        let logContent = `<h3 class="log-entry">${gameState.battleLog}</h3>`;
+        let logContent = `<p class="log-entry">${gameState.battleLog}</p>`;
         
         card.innerHTML = `
-            <h3>Diario de Batalla</h3>
+            <h3 class="log-title">Diario de Batalla</h3>
             ${logContent}
+            <p class="status-idle">Usa los botones de +/- para empezar la acción.</p>
         `;
         return card;
     }
@@ -783,7 +783,7 @@ class BossManager {
         card.id = `card-boss`;
         
         card.innerHTML = `
-            <div class="boss-header">BOSS</div>
+            <div class="boss-header">JEFE</div>
             <div class="boss-avatar" style="background-image: url('${CONFIG.AVATAR_PATH}generico1.png')"></div>
             <div class="boss-name">${boss.name}</div>
             
@@ -798,6 +798,7 @@ class BossManager {
         return card;
     }
 
+    // CORRECCIÓN CLAVE: Se asegura que la narración se active aquí.
     static handleLifeChange(delta, button) {
         const boss = gameState.boss;
         if (!boss) return;
@@ -805,10 +806,39 @@ class BossManager {
         const newVida = Math.max(0, boss.vida + delta); 
         boss.vida = newVida;
         
+        // 1. Reproducir audio de efecto (daño/curación)
         gameState.playSound(delta < 0 ? 'damage' : 'heal');
 
         BossManager.updateCardVisuals(boss);
-        CounterManager.updateClickCounter('boss', delta, true);
+        
+        // 2. Activar el contador para generar la narración de voz.
+        // Usamos el ID 'boss' para que el contador sepa a qué elemento visual referirse.
+        // Nota: CounterManager utiliza el ID 'boss' para el elemento visual, pero no para la lógica de log.
+        // La lógica de log se activa cuando isBoss=true, pero aquí lo forzamos con isBoss=false en el proxy
+        // para que CardManager.updateBattleLog no intente buscar un ID de jugador real, si no que lo trate como un ID de Boss.
+        // Sin embargo, como CardManager.updateBattleLog está diseñado para usar el ID del jugador, es mejor
+        // generar el mensaje directamente aquí y reproducir el audio.
+        
+        let message;
+        const totalChange = Math.abs(delta);
+        const isDamage = delta < 0;
+
+        if (isDamage) {
+            message = totalChange >= 5 
+                ? getRandomMessage(BATTLE_LOG_MESSAGES.DAMAGE_HIGH)
+                : getRandomMessage(BATTLE_LOG_MESSAGES.DAMAGE_LOW);
+        } else {
+            message = totalChange >= 4 
+                ? getRandomMessage(BATTLE_LOG_MESSAGES.HEAL_HIGH)
+                : getRandomMessage(BATTLE_LOG_MESSAGES.HEAL_LOW);
+        }
+        
+        // Reproducir la narración de voz inmediatamente
+        gameState.playNarrationForLog(message);
+
+        // Activamos el contador flotante (que NO tiene lógica de narración)
+        CounterManager.updateClickCounter('boss', delta, true); 
+        
         utils.animate(button, "btn-animate", 400);
 
         if (boss.vida <= 0) {
@@ -819,24 +849,28 @@ class BossManager {
     static updateCardVisuals(boss) {
         const vidaEl = document.getElementById('life-boss');
         const cardEl = elements.centralCardWrapper.querySelector('.central-card');
+        
+        // Si no está en modo jefe, no hay carta de jefe que actualizar
+        if (!vidaEl || !cardEl) return;
 
-        if (vidaEl) {
-            vidaEl.textContent = boss.vida;
-            
-            const ratio = boss.vida / boss.maxVida;
-            if (cardEl) {
-                if (ratio <= 0.25 && boss.vida > 0) {
-                    cardEl.style.boxShadow = `0 0 40px var(--boss-glow), inset 0 0 30px rgba(255, 0, 0, 0.7)`;
-                    cardEl.style.borderColor = "#ff0000";
-                } else if (ratio <= 0) {
-                     cardEl.style.boxShadow = `0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 0, 0, 0.7)`;
-                     cardEl.style.filter = "grayscale(100%)";
-                } else {
-                    cardEl.style.boxShadow = `0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5)`;
-                    cardEl.style.borderColor = "var(--boss-border)";
-                    cardEl.style.filter = "none";
-                }
-            }
+        vidaEl.textContent = boss.vida;
+        
+        const ratio = boss.vida / boss.maxVida;
+        
+        // Lógica de brillo y color según la vida del Jefe
+        if (ratio <= 0.25 && boss.vida > 0) {
+            // Vida crítica (resplandor rojo intenso)
+            cardEl.style.boxShadow = `0 0 40px var(--boss-glow), inset 0 0 30px rgba(255, 0, 0, 0.7)`;
+            cardEl.style.borderColor = "#ff0000";
+        } else if (boss.vida <= 0) {
+             // Derrotado (gris/muerto)
+             cardEl.style.boxShadow = `0 0 50px rgba(0, 0, 0, 0.8), inset 0 0 30px rgba(0, 0, 0, 0.7)`;
+             cardEl.style.filter = "grayscale(100%)";
+        } else {
+            // Vida normal
+            cardEl.style.boxShadow = `0 0 30px rgba(255, 0, 0, 0.4), inset 0 0 20px rgba(0, 0, 0, 0.5)`;
+            cardEl.style.borderColor = "var(--boss-border)";
+            cardEl.style.filter = "none";
         }
     }
     
@@ -844,9 +878,11 @@ class BossManager {
         const bossCard = document.getElementById(`card-boss`);
         if (bossCard) {
             utils.animate(bossCard, "defeat-flash", 1000);
-            BossManager.updateBattleLog("¡Felicitaciones, has ganado la Batalla!"); // Usar mensaje de victoria
-            gameState.playNarrationForLog("¡Felicitaciones, has ganado la Batalla!"); // Reproducir audio de victoria
-            showModal("VICTORIA", "¡Has derrotado al Jefe! ¡Felicidades!", "🎉", [{ text: "Reiniciar Partida", value: true, class: "btn-primary" }], (res) => {
+            
+            const VICTORY_MESSAGE = BATTLE_LOG_MESSAGES.BOSS_VICTORY_MESSAGE; 
+            
+            BossManager.updateBattleLog(VICTORY_MESSAGE); // Actualiza log y reproduce audio
+            showModal("VICTORIA", VICTORY_MESSAGE, "🎉", [{ text: "Reiniciar Partida", value: true, class: "btn-primary" }], (res) => {
                 if (res) EventManager.handleGameReset();
             });
         }
@@ -881,23 +917,16 @@ class EventManager {
 
 
         // Toggle visibility of character/boss fields
-        elements.useCharactersCheckbox.addEventListener('change', EventManager.toggleCharacterFields);
-        // Aseguramos que toggleBossFields solo se use para actualizar la visibilidad
-        elements.useBossModeCheckbox.addEventListener('change', EventManager.toggleBossFields);
-
-        // Initial setup display
-        EventManager.toggleCharacterFields();
+        // CORRECCIÓN: Ya no son necesarios toggleCharacterFields y toggleBossFields, se manejan en el flujo.
+        elements.useCharactersCheckbox.addEventListener('change', () => {
+             // Solo limpiamos los datos para forzar la selección al volver a la etapa de jugador.
+             if (!elements.useCharactersCheckbox.checked) {
+                 elements.playerCharacterSelect.value = '';
+             }
+        });
+        
         // Inicialmente ocultamos los campos de jefe al cargar la pantalla de setup
         elements.bossSetupFields.classList.add('hidden'); 
-    }
-    
-    static toggleCharacterFields() {
-         // Lógica manejada dentro de updatePlayerStep
-    }
-    
-    static toggleBossFields() {
-        // Esta función solo debe alternar la visibilidad de los campos de jefe en la pantalla de resumen
-        // Se llama explícitamente desde showSummary
     }
     
     // Variables de estado de flujo
@@ -959,13 +988,13 @@ class EventManager {
     static showSummary() {
         elements.summaryList.innerHTML = '';
         EventManager.playersData.forEach((p, idx) => {
-            const charInfo = EventManager.useCharacters ? CHARACTERS[p.character].name : "Aventurero";
+            const charInfo = EventManager.useCharacters ? CHARACTERS[p.character].name : "Aventurero Genérico";
             const li = document.createElement('li');
             li.textContent = `Jugador ${idx + 1}: ${p.name} (${charInfo})`;
             elements.summaryList.appendChild(li);
         });
 
-        // CORRECCIÓN CLAVE: Mostrar campos de jefe en el resumen si el modo jefe está activo
+        // Mostrar campos de jefe en el resumen si el modo jefe está activo
         if (EventManager.useBossMode) {
             elements.bossSetupFields.classList.remove('hidden');
         } else {
@@ -976,13 +1005,15 @@ class EventManager {
     }
 
     static handleGameStart() {
-        if (EventManager.useBossMode) { // Ahora usa EventManager.useBossMode
+        if (EventManager.useBossMode) { 
             const bossName = elements.bossNameInput.value.trim();
             const bossLife = parseInt(elements.bossLifeInput.value, 10);
             
-            // La validación ahora debe ocurrir, ya que el input es visible en el resumen
             if (!bossName) { utils.showAlert('Ingresa un nombre para el Jefe.'); return; }
-            if (bossLife <= 0 || isNaN(bossLife)) { utils.showAlert('La vida inicial del Jefe debe ser un número positivo.'); return; }
+            if (bossLife <= 0 || isNaN(bossLife)) { 
+                utils.showAlert('La vida inicial del Jefe debe ser un número positivo.'); 
+                return; 
+            }
             
             gameState.boss = { name: bossName, vida: bossLife, maxVida: bossLife };
             gameState.isBossMode = true;
@@ -993,9 +1024,10 @@ class EventManager {
 
         const genericAvatars = utils.shuffleArray(GENERIC_AVATARS);
         gameState.players = EventManager.playersData.map((p, idx) => {
-            let vida = 50, avatar = genericAvatars[idx % genericAvatars.length], maxVida = 50, characterName = "Aventurero";
+            let vida = 50, avatar = genericAvatars[idx % genericAvatars.length], maxVida = 50, characterName = "Aventurero Genérico";
             if (EventManager.useCharacters && CHARACTERS[p.character]) {
                 vida = CHARACTERS[p.character].vida;
+                // CORRECCIÓN: El avatar inicial para personajes es el masculino ('m')
                 avatar = CHARACTERS[p.character].icon; 
                 maxVida = CHARACTERS[p.character].vida;
                 characterName = GENDER_NAMES[p.character]['m']; 
@@ -1018,11 +1050,14 @@ class EventManager {
         CardManager.renderPlayerCards();
         gameState.resetCounters();
         
-        // AUDIO START: Reproducir narración y música de fondo simultáneamente
+        // Iniciar audio
         gameState.narrations.playIntro(); 
         gameState.bgMusic.start();
         
         elements.gameFooter.classList.remove('hidden'); // Restaurar footer
+        
+        // Inicializar alerta del footer
+        BossManager.updateFooterAlerts(BATTLE_LOG_MESSAGES.IDLE, 'idle');
     }
 
     static handleGameReset() {
